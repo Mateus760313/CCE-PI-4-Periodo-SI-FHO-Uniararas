@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="styles/style.css"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CCE - Simulador</title>
+    <link rel="icon" type="image/png" href="src/images/icon.png">
+</head>
+<body>
+
+<div class="container" role="main" aria-labelledby="pageTitle">
+    <div class="logo" aria-label="Logo CCE, Controle de Consumo Energético" role="img">
+        <svg class="logo-icon" viewBox="0 0 64 64" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" >
+            <circle cx="32" cy="32" r="30" stroke="currentColor" stroke-width="4" fill="none"/>
+            <path fill="currentColor" d="M26 14l-9 18h11l-5 18 18-27H31l5-9z"/>
+        </svg>
+        CCE
+    </div>
+    <h1 id="pageTitle">Controle de Consumo Energético</h1>
+
+    <label for="nome">Nome do Aparelho:</label>
+    <input type="text" id="nome" placeholder="Ex: Geladeira" aria-required="true" />
+
+    <label for="potencia">Potência do Aparelho (W):</label>
+    <input type="number" id="potencia" placeholder="Ex: 150" min="0" aria-required="true" />
+
+    <label for="valorKWh">Valor do KWh (R$):</label>
+    <input type="number" id="valorKWh" placeholder="Ex: 0.60" step="0.01" min="0" aria-required="true" />
+
+    <label for="tempoUso">Tempo de Uso Diário (horas):</label>
+    <input type="number" id="tempoUso" placeholder="Ex: 5" min="0" step="0.1" aria-required="true" />
+
+    <label for="valorConta">Valor Médio da Conta de Energia (R$):</label>
+    <input type="number" id="valorConta" placeholder="Ex: 150" step="0.01" min="0" aria-required="true" />
+
+    <button id="calcular" aria-describedby="btnHelp">Calcular Gastos</button>
+
+    <div class="resultado" id="resultado" style="display:none" aria-live="polite" aria-atomic="true">
+        <p class="resumo-text" id="resumo"></p>
+        <table aria-label="Resumo dos gastos do aparelho">
+            <thead>
+                <tr>
+                    <th>Valor do KWh (R$)</th>
+                    <th>Gasto Mensal (R$)</th>
+                    <th>Porcentagem da Conta (%)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td id="valorKWhMensal"></td>
+                    <td id="gastoMensal"></td>
+                    <td id="porcentagemConta"></td>
+                </tr>
+            </tbody>
+        </table>
+        <div id="avisoExcedeu" class="aviso-excedeu" role="alert" style="display:none;"></div>
+    </div>
+</div>
+
+
+<script src="scripts/index.js"></script>
+</body>
+</html>
+

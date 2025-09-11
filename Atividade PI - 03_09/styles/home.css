@@ -1,0 +1,350 @@
+:root {
+    --primary-color: #4CAF50; /* Verde para energia e economia */
+    --secondary-color: #333;
+    --background-color: #f4f4f4;
+    --text-color: #333;
+    --container-bg: #ffffff;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    margin: 0;
+    padding-top: 70px; /* Adicionado para compensar a navbar fixa */
+    background-color: var(--background-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Navbar */
+.navbar {
+    background: var(--container-bg);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 1rem 0;
+    position: fixed; /* Alterado para fixed */
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    box-sizing: border-box;
+}
+
+.navbar .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+.logo-icon {
+    width: 40px;
+    height: 40px;
+    margin-right: 10px;
+    color: var(--primary-color);
+}
+
+.navbar nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+}
+
+.navbar nav ul li {
+    margin-left: 20px;
+}
+
+.navbar nav a {
+    text-decoration: none;
+    color: var(--secondary-color);
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.navbar nav a:hover {
+    color: var(--primary-color);
+}
+
+.btn-login, .btn-cadastro {
+    border: 1px solid var(--primary-color);
+    padding: 8px 16px;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+.btn-cadastro {
+    background-color: var(--primary-color);
+    color: white;
+}
+.btn-cadastro:hover {
+    background-color: #45a049;
+    color: white;
+}
+.btn-login:hover {
+    background-color: rgba(76, 175, 80, 0.1);
+}
+
+/* Botão Hamburger - inicialmente escondido */
+#hamburger-btn {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 10px;
+    z-index: 1001;
+}
+
+.hamburger-line {
+    display: block;
+    width: 25px;
+    height: 3px;
+    background-color: var(--secondary-color);
+    margin: 5px 0;
+    transition: all 0.3s ease;
+}
+
+
+/* Seção Hero */
+.hero-section {
+    background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1487875961445-47a00398c267?q=80&w=2070&auto=format&fit=crop') no-repeat center center/cover;
+    color: white;
+    text-align: center;
+    padding: 100px 0;
+}
+
+.hero-section h1 {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.hero-section .subtitle {
+    font-size: 1.2rem;
+    max-width: 600px;
+    margin: 0 auto 2rem;
+}
+
+.hero-buttons a {
+    margin: 0.5rem;
+}
+
+.btn-principal {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 15px 30px;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+    display: inline-block;
+}
+
+.btn-principal:hover {
+    background-color: #45a049;
+}
+
+.btn-secundario {
+    background-color: orange;
+    color: white;
+    padding: 15px 30px;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+    display: inline-block;
+}
+
+.btn-secundario:hover {
+    background-color: rgb(207, 135, 2);
+}
+
+/* Seção Sobre Nós */
+.about-section {
+    padding: 60px 20px;
+    background: var(--container-bg);
+    text-align: center;
+}
+.about-section h2, .form-section h2 {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+}
+.about-section p {
+    max-width: 800px;
+    margin: 0 auto;
+    font-size: 1.1rem;
+}
+
+/* Seções de Formulário (Login/Cadastro) */
+.form-section {
+    padding: 60px 20px;
+}
+
+.form-container {
+    max-width: 500px;
+    margin: 0 auto;
+    background: white;
+    padding: 40px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    border-radius: 8px;
+}
+
+.form-container h2 {
+    text-align: center;
+}
+
+.form-container label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.form-container input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box; /* Garante que padding não afete a largura */
+}
+
+.form-container button {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    background-color: var(--primary-color);
+    color: white;
+    font-size: 1rem;
+    font-weight: bold;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.form-container button:hover {
+    background-color: #45a049;
+}
+.form-switch {
+    text-align: center;
+    margin-top: 20px;
+}
+.form-switch a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: bold;
+}
+
+
+/* Footer */
+.footer {
+    background: var(--secondary-color);
+    color: white;
+    text-align: center;
+    padding: 20px 0;
+}
+
+/* ======================================================= */
+/* ============= MEDIA QUERIES RESPONSIVAS =============== */
+/* ======================================================= */
+
+/* Telas de Tablet (até 768px) */
+@media (max-width: 768px) {
+    .navbar nav {
+        display: none; /* Esconde o menu de navegação */
+        position: absolute;
+        top: 70px; /* Altura da navbar */
+        left: 0;
+        width: 100%;
+        background-color: var(--container-bg);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .navbar nav.active {
+        display: block; /* Mostra o menu quando ativo */
+    }
+
+    .navbar nav ul {
+        flex-direction: column; /* Links um abaixo do outro */
+        width: 100%;
+    }
+
+    .navbar nav ul li {
+        margin: 0;
+        width: 100%;
+        text-align: center;
+    }
+
+    .navbar nav ul li a {
+        display: block;
+        padding: 1rem;
+        border-bottom: 1px solid #eee;
+    }
+
+    #hamburger-btn {
+        display: block; /* Mostra o botão hamburger */
+    }
+
+    .hero-section h1 {
+        font-size: 2.5rem;
+    }
+
+    .hero-section .subtitle {
+        font-size: 1.1rem;
+    }
+
+    .about-section h2, .form-section h2 {
+        font-size: 2rem;
+    }
+}
+
+/* Telas de Celular (até 480px) */
+@media (max-width: 480px) {
+    body {
+        padding-top: 60px; /* Ajusta o padding para a navbar menor */
+    }
+    
+    .navbar{
+        padding: 0.5rem 0;
+    }
+    
+    .hero-section {
+        padding: 60px 20px;
+    }
+
+    .hero-section h1 {
+        font-size: 2rem;
+    }
+
+    .hero-section .subtitle {
+        font-size: 1rem;
+    }
+    
+    /* Faz os botões ficarem um embaixo do outro */
+    .hero-buttons a {
+        display: block;
+        width: 80%;
+        margin: 1rem auto;
+    }
+
+    .form-container {
+        padding: 20px;
+    }
+}

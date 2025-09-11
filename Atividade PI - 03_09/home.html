@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="styles/home.css"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CCE - Controle de Consumo Energético</title>
+    <link rel="icon" type="image/png" href="src/images/icon.png">
+</head>
+<body>
+
+    <header class="navbar">
+        <div class="container">
+            <div class="logo" aria-label="Logo CCE, Controle de Consumo Energético" role="img">
+                <svg class="logo-icon" viewBox="0 0 64 64" aria-hidden="true" focusable="false" xmlns="http://www.w.org/2000/svg" >
+                    <circle cx="32" cy="32" r="30" stroke="currentColor" stroke-width="4" fill="none"/>
+                    <path fill="currentColor" d="M26 14l-9 18h11l-5 18 18-27H31l5-9z"/>
+                </svg>
+                CCE
+            </div>
+            <nav id="nav-menu">
+                <ul>
+                    <li><a href="#hero">Início</a></li>
+                    <li><a href="#sobre">Sobre Nós</a></li>
+                    <li><a href="#login" class="btn-login">Login</a></li>
+                    <li><a href="#cadastro" class="btn-cadastro">Cadastro</a></li>
+                </ul>
+            </nav>
+            <button id="hamburger-btn" aria-label="Abrir menu" aria-expanded="false">
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+            </button>
+        </div>
+    </header>
+
+    <main>
+        <section id="hero" class="hero-section">
+            <div class="container">
+                <h1>Controle de Consumo Energético</h1>
+                <p class="subtitle">A ferramenta definitiva para entender e otimizar seus gastos com energia elétrica. Comece a economizar agora!</p>
+                <div class="hero-buttons">
+                    <a href="#cadastro" class="btn-principal">Crie sua conta gratuitamente</a>
+                    <a href="index.html" class="btn-secundario">Acessar o Simulador gratuitamente</a>
+                </div>
+            </div>
+        </section>
+
+        <section id="sobre" class="about-section">
+            <div class="container">
+                <h2>Sobre Nós</h2>
+                <p>
+                    A CCE nasceu da necessidade de dar às pessoas o poder de controlar suas despesas com energia de forma simples e intuitiva. Nossa missão é fornecer uma ferramenta transparente que não apenas calcula o consumo de seus aparelhos, mas também educa e promove o uso consciente da energia. Acreditamos que, com a informação certa em mãos, cada indivíduo pode fazer a diferença, tanto no próprio bolso quanto para o planeta.
+                </p>
+            </div>
+        </section>
+
+        <section id="login" class="form-section" style="display:none;">
+            <div class="container form-container">
+                <h2>Acesse sua Conta</h2>
+                <form>
+                    <label for="email-login">Email:</label>
+                    <input type="email" id="email-login" placeholder="seuemail@exemplo.com" required />
+
+                    <label for="senha-login">Senha:</label>
+                    <input type="password" id="senha-login" placeholder="Sua senha" required />
+
+                    <button type="submit">Entrar</button>
+                    <p class="form-switch">Não tem uma conta? <a href="#cadastro">Cadastre-se</a></p>
+                </form>
+            </div>
+        </section>
+
+        <section id="cadastro" class="form-section" style="display:none;">
+            <div class="container form-container">
+                <h2>Crie sua Conta</h2>
+                <form>
+                    <label for="nome-cadastro">Nome Completo:</label>
+                    <input type="text" id="nome-cadastro" placeholder="Seu nome" required />
+                    
+                    <label for="email-cadastro">Email:</label>
+                    <input type="email" id="email-cadastro" placeholder="seuemail@exemplo.com" required />
+
+                    <label for="senha-cadastro">Crie uma Senha:</label>
+                    <input type="password" id="senha-cadastro" placeholder="Mínimo de 6 caracteres" required />
+
+                    <button type="submit">Cadastrar</button>
+                     <p class="form-switch">Já possui uma conta? <a href="#login">Faça Login</a></p>
+                </form>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 CCE - Controle de Consumo Energético. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <script src="scripts/home.js"></script>
+
+</body>
+</html>

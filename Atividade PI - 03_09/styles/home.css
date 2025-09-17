@@ -1,5 +1,5 @@
 :root {
-    --primary-color: #4CAF50; /* Verde para energia e economia */
+    --primary-color: #4CAF50; 
     --secondary-color: #333;
     --background-color: #f4f4f4;
     --text-color: #333;
@@ -13,7 +13,7 @@ html {
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     margin: 0;
-    padding-top: 70px; /* Adicionado para compensar a navbar fixa */
+    padding-top: 70px; 
     background-color: var(--background-color);
     color: var(--text-color);
     line-height: 1.6;
@@ -30,7 +30,7 @@ body {
     background: var(--container-bg);
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     padding: 1rem 0;
-    position: fixed; /* Alterado para fixed */
+    position: fixed; 
     top: 0;
     left: 0;
     width: 100%;
@@ -176,10 +176,91 @@ body {
     background-color: rgb(207, 135, 2);
 }
 
+/* Seção de Destaques (Stats) */
+.stats-section {
+    padding: 60px 0;
+    background-color: #f9f9f9; /* Um fundo sutil para diferenciar */
+}
+
+.stats-grid {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    gap: 20px; /* Espaçamento entre os cards */
+}
+
+.stat-card {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    text-align: center;
+    padding: 30px;
+    flex: 1; /* Faz os cards ocuparem o espaço igualmente */
+    min-width: 250px; /* Largura mínima antes de quebrar a linha */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: var(--primary-color);
+    margin-bottom: 10px;
+}
+
+.stat-description {
+    font-size: 1rem;
+    color: #666;
+}
+
+/* Seção de Importância */
+.importance-section {
+    padding: 80px 0;
+    background-color: var(--container-bg);
+}
+
+.importance-content {
+    display: flex;
+    align-items: center;
+    gap: 50px;
+}
+
+.importance-text {
+    flex: 1;
+}
+
+.importance-text h2 {
+    font-size: 2.5rem;
+    color: var(--primary-color);
+    margin-bottom: 20px;
+}
+
+.importance-text p {
+    font-size: 1.1rem;
+    line-height: 1.7;
+    margin-bottom: 15px;
+}
+
+.importance-image {
+    flex: 1;
+    max-width: 500px;
+}
+
+.importance-image img {
+    width: 100%;
+    border-radius: 8px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+
 /* Seção Sobre Nós */
 .about-section {
     padding: 60px 20px;
-    background: var(--container-bg);
+    background: #f9f9f9;
     text-align: center;
 }
 .about-section h2, .form-section h2 {
@@ -223,7 +304,7 @@ body {
     margin-bottom: 20px;
     border: 1px solid #ccc;
     border-radius: 5px;
-    box-sizing: border-box; /* Garante que padding não afete a largura */
+    box-sizing: border-box; 
 }
 
 .form-container button {
@@ -268,9 +349,9 @@ body {
 /* Telas de Tablet (até 768px) */
 @media (max-width: 768px) {
     .navbar nav {
-        display: none; /* Esconde o menu de navegação */
+        display: none; 
         position: absolute;
-        top: 70px; /* Altura da navbar */
+        top: 70px; 
         left: 0;
         width: 100%;
         background-color: var(--container-bg);
@@ -278,11 +359,11 @@ body {
     }
     
     .navbar nav.active {
-        display: block; /* Mostra o menu quando ativo */
+        display: block; 
     }
 
     .navbar nav ul {
-        flex-direction: column; /* Links um abaixo do outro */
+        flex-direction: column; 
         width: 100%;
     }
 
@@ -299,7 +380,7 @@ body {
     }
 
     #hamburger-btn {
-        display: block; /* Mostra o botão hamburger */
+        display: block; 
     }
 
     .hero-section h1 {
@@ -313,12 +394,21 @@ body {
     .about-section h2, .form-section h2 {
         font-size: 2rem;
     }
+
+    .importance-content {
+        flex-direction: column; /* Coloca o texto sobre a imagem */
+        text-align: center;
+    }
+
+    .importance-text h2 {
+        font-size: 2rem;
+    }
 }
 
 /* Telas de Celular (até 480px) */
 @media (max-width: 480px) {
     body {
-        padding-top: 60px; /* Ajusta o padding para a navbar menor */
+        padding-top: 60px; 
     }
     
     .navbar{
@@ -346,5 +436,13 @@ body {
 
     .form-container {
         padding: 20px;
+    }
+
+    .stat-card {
+        width: 100%; /* Faz cada card ocupar a largura total */
+    }
+
+    .stats-section, .importance-section {
+        padding: 40px 20px;
     }
 }

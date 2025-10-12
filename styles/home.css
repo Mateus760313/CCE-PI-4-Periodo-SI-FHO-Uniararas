@@ -1,0 +1,497 @@
+:root {
+    /* Cores principais */
+    --primary-color: #4CAF50; /* Verde Principal */
+    --secondary-color: #333;  /* Texto/Escuro */
+    --background-color: #f4f4f4;
+    --container-bg: #ffffff;
+    --text-color: #333;
+    --accent-color: #fb8c00; /* Laranja para botões secundários */
+}
+
+/* Base e Reset */
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    margin: 0;
+    /* Espaço no topo para o navbar fixo */
+    padding-top: 70px; 
+    background-color: var(--background-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* ----------------------------------
+ * 1. NAVBAR (Header)
+ * ---------------------------------- */
+.navbar {
+    background: var(--container-bg);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 1rem 0;
+    position: fixed; /* CRÍTICO: Fixa a barra */
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000; /* CRÍTICO: Garante que fique acima de tudo */
+    box-sizing: border-box;
+}
+
+.navbar .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Logo */
+.logo {
+    display: flex;
+    align-items: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.logo-icon {
+    width: 35px;
+    height: 35px;
+    margin-right: 8px;
+}
+
+/* Menu de Navegação */
+.navbar nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+}
+
+.navbar nav ul li {
+    margin-left: 25px;
+}
+
+.navbar nav ul li a {
+    text-decoration: none;
+    color: var(--secondary-color);
+    font-weight: 500;
+    transition: color 0.3s ease;
+    padding: 5px 0;
+}
+
+.navbar nav ul li a:hover {
+    color: var(--primary-color);
+}
+
+/* Botões de Ação na Nav */
+.navbar nav ul li .btn-login,
+.navbar nav ul li .btn-cadastro {
+    display: inline-block;
+    padding: 8px 15px;
+    border-radius: 5px;
+    font-weight: 600;
+    margin-left: 10px;
+}
+
+.navbar nav ul li .btn-login {
+    background-color: transparent;
+    border: 2px solid var(--primary-color);
+    color: var(--primary-color);
+}
+
+.navbar nav ul li .btn-cadastro {
+    background-color: var(--primary-color);
+    color: white;
+    border: 2px solid var(--primary-color);
+}
+
+.navbar nav ul li .btn-login:hover {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.navbar nav ul li .btn-cadastro:hover {
+    background-color: #388e3c; /* Verde um pouco mais escuro */
+}
+
+
+/* Hamburger Menu */
+#hamburger-btn {
+    display: none; /* Esconde em desktop */
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    z-index: 1001;
+}
+
+.hamburger-line {
+    display: block;
+    width: 25px;
+    height: 3px;
+    background-color: var(--secondary-color);
+    margin: 4px 0;
+    transition: transform 0.3s ease;
+}
+
+
+/* ----------------------------------
+ * 2. SEÇÕES PRINCIPAIS
+ * ---------------------------------- */
+section {
+    padding: 80px 0;
+}
+
+/* Seção Hero */
+.hero-section {
+    background-color: #e8f5e9; /* Fundo suave */
+    text-align: center;
+    padding: 100px 0;
+    border-bottom: 5px solid var(--primary-color);
+}
+
+.hero-section h1 {
+    font-size: 3rem;
+    color: var(--primary-color);
+    margin-bottom: 10px;
+}
+
+.hero-section .subtitle {
+    font-size: 1.25rem;
+    color: var(--secondary-color);
+    margin-bottom: 30px;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.hero-buttons a {
+    text-decoration: none;
+    padding: 12px 25px;
+    border-radius: 8px;
+    font-weight: 600;
+    margin: 0 10px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hero-buttons .btn-principal {
+    background-color: var(--primary-color);
+    color: white;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.hero-buttons .btn-secundario {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+.hero-buttons a:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.25);
+}
+
+/* Seção Stats */
+.stats-section {
+    background-color: var(--container-bg);
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+}
+
+.stats-grid {
+    display: flex;
+    justify-content: space-around;
+    gap: 20px;
+}
+
+.stat-card {
+    flex: 1;
+    padding: 20px;
+    background-color: #fafafa;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--accent-color);
+    margin-bottom: 5px;
+}
+
+.stat-description {
+    color: var(--secondary-color);
+    font-size: 0.9rem;
+}
+
+/* Seção Importance (Imagem e Texto) */
+.importance-section {
+    background-color: #f9f9f9;
+}
+
+.importance-content {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+}
+
+.importance-text, .importance-image {
+    flex: 1;
+}
+
+.importance-text h2 {
+    font-size: 2.2rem;
+    color: var(--primary-color);
+    margin-top: 0;
+}
+
+.importance-image img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Seção Sobre Nós */
+.about-section {
+    text-align: center;
+}
+.about-section h2 {
+    color: var(--primary-color);
+    margin-bottom: 20px;
+}
+.about-section p {
+    max-width: 800px;
+    margin: 0 auto;
+    font-size: 1.1rem;
+    line-height: 1.8;
+}
+
+
+/* ----------------------------------
+ * 3. FORMS (Login e Cadastro)
+ * ---------------------------------- */
+.form-section {
+    padding: 50px 0;
+    text-align: center;
+}
+
+.form-container {
+    max-width: 400px;
+    background-color: var(--container-bg);
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    margin: 0 auto;
+}
+
+.form-container h2 {
+    color: var(--primary-color);
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 1.8rem;
+}
+
+.form-container form {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+}
+
+.form-container label {
+    margin-top: 15px;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.form-container input[type="text"],
+.form-container input[type="email"],
+.form-container input[type="password"] {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+.form-container input:focus {
+    border-color: var(--primary-color);
+    outline: none;
+}
+
+.form-container button[type="submit"] {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-top: 25px;
+    transition: background-color 0.3s ease;
+}
+
+.form-container button[type="submit"]:hover {
+    background-color: #388e3c;
+}
+
+.form-switch {
+    margin-top: 15px;
+    font-size: 0.95rem;
+}
+
+.form-switch a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+.form-switch a:hover {
+    text-decoration: underline;
+}
+
+/* Feedback de Autenticação */
+.form-feedback {
+    margin: 15px 0 0; /* Ajustado para melhor espaçamento */
+    padding: 10px;
+    border-radius: 5px;
+    text-align: center;
+    font-weight: bold;
+    display: block; 
+}
+.form-feedback.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+.form-feedback.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+.form-feedback.loading {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+/* ----------------------------------
+ * 4. FOOTER
+ * ---------------------------------- */
+.footer {
+    background-color: var(--secondary-color); /* CRÍTICO: Cor de fundo escuro para o footer */
+    color: white;
+    text-align: center;
+    padding: 20px 0;
+    font-size: 0.9rem;
+}
+
+
+/* ----------------------------------
+ * 5. RESPONSIVIDADE (Celular)
+ * ---------------------------------- */
+@media (max-width: 992px) {
+    .navbar nav {
+        position: absolute;
+        top: 70px; /* Alinhado após o navbar */
+        left: 0;
+        width: 100%;
+        background-color: var(--container-bg);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        display: none; /* Escondido por padrão */
+        flex-direction: column;
+        padding: 10px 0;
+    }
+
+    .navbar nav.active {
+        display: flex; /* Mostra quando a classe 'active' é ativada pelo JS */
+    }
+
+    .navbar nav ul {
+        flex-direction: column; 
+        width: 100%;
+        align-items: flex-start;
+    }
+
+    .navbar nav ul li {
+        margin: 0;
+        width: 100%;
+        border-bottom: 1px solid #eee;
+    }
+
+    .navbar nav ul li:last-child {
+        border-bottom: none;
+    }
+
+    .navbar nav ul li a {
+        display: block;
+        padding: 1rem 20px;
+        color: var(--secondary-color);
+    }
+    
+    .navbar nav ul li .btn-login,
+    .navbar nav ul li .btn-cadastro {
+        margin: 0;
+        border: none; /* Remove a borda no menu mobile */
+        background-color: transparent;
+        color: var(--secondary-color);
+        padding: 1rem 20px;
+    }
+    
+    .navbar nav ul li .btn-cadastro {
+        /* Para manter a cor do cadastro no menu */
+        background-color: var(--primary-color);
+        color: white;
+        text-align: center;
+    }
+
+
+    #hamburger-btn {
+        display: block; /* Mostra o botão em telas menores */
+    }
+
+    .importance-content {
+        flex-direction: column; /* Coloca a imagem sob o texto */
+        text-align: center;
+    }
+    
+    .stats-grid {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .stat-card {
+        max-width: 300px;
+        margin: 0 auto;
+    }
+    
+}
+
+/* Telas de Celular (até 480px) */
+@media (max-width: 480px) {
+    .hero-section h1 {
+        font-size: 2.2rem;
+    }
+    
+    .hero-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .hero-buttons a {
+        margin: 0;
+    }
+
+    .importance-text h2 {
+        font-size: 1.8rem;
+    }
+    
+}

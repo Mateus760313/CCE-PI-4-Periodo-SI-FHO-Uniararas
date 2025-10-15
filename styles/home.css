@@ -1,14 +1,12 @@
 :root {
-    /* Cores principais */
     --primary-color: #4CAF50; /* Verde Principal */
-    --secondary-color: #333;  /* Texto/Escuro */
+    --secondary-color: #333; /* Texto/Escuro */
     --background-color: #f4f4f4;
-    --container-bg: #ffffff;
     --text-color: #333;
+    --container-bg: #ffffff;
     --accent-color: #fb8c00; /* Laranja para botões secundários */
 }
 
-/* Base e Reset */
 html {
     scroll-behavior: smooth;
 }
@@ -16,7 +14,6 @@ html {
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     margin: 0;
-    /* Espaço no topo para o navbar fixo */
     padding-top: 70px; 
     background-color: var(--background-color);
     color: var(--text-color);
@@ -29,18 +26,16 @@ body {
     padding: 0 20px;
 }
 
-/* ----------------------------------
- * 1. NAVBAR (Header)
- * ---------------------------------- */
+/* Navbar */
 .navbar {
     background: var(--container-bg);
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     padding: 1rem 0;
-    position: fixed; /* CRÍTICO: Fixa a barra */
+    position: fixed; 
     top: 0;
     left: 0;
     width: 100%;
-    z-index: 1000; /* CRÍTICO: Garante que fique acima de tudo */
+    z-index: 1000;
     box-sizing: border-box;
 }
 
@@ -50,85 +45,71 @@ body {
     align-items: center;
 }
 
-/* Logo */
 .logo {
     display: flex;
     align-items: center;
     font-size: 1.5rem;
-    font-weight: 700;
+    font-weight: bold;
     color: var(--primary-color);
 }
 
 .logo-icon {
-    width: 35px;
-    height: 35px;
-    margin-right: 8px;
+    width: 40px;
+    height: 40px;
+    margin-right: 10px;
+    color: var(--primary-color);
 }
 
-/* Menu de Navegação */
 .navbar nav ul {
     list-style: none;
-    padding: 0;
     margin: 0;
+    padding: 0;
     display: flex;
     align-items: center;
 }
 
 .navbar nav ul li {
-    margin-left: 25px;
+    margin-left: 20px;
 }
 
-.navbar nav ul li a {
+.navbar nav a {
     text-decoration: none;
     color: var(--secondary-color);
     font-weight: 500;
     transition: color 0.3s ease;
-    padding: 5px 0;
 }
 
-.navbar nav ul li a:hover {
+.navbar nav a:hover {
     color: var(--primary-color);
 }
 
-/* Botões de Ação na Nav */
-.navbar nav ul li .btn-login,
-.navbar nav ul li .btn-cadastro {
-    display: inline-block;
-    padding: 8px 15px;
+.btn-login, .btn-cadastro {
+    border: 1px solid var(--primary-color);
+    padding: 8px 16px;
     border-radius: 5px;
-    font-weight: 600;
-    margin-left: 10px;
+    transition: all 0.3s ease;
 }
 
-.navbar nav ul li .btn-login {
-    background-color: transparent;
-    border: 2px solid var(--primary-color);
-    color: var(--primary-color);
-}
-
-.navbar nav ul li .btn-cadastro {
-    background-color: var(--primary-color);
-    color: white;
-    border: 2px solid var(--primary-color);
-}
-
-.navbar nav ul li .btn-login:hover {
+.btn-cadastro {
     background-color: var(--primary-color);
     color: white;
 }
 
-.navbar nav ul li .btn-cadastro:hover {
-    background-color: #388e3c; /* Verde um pouco mais escuro */
+.btn-cadastro:hover {
+    background-color: #45a049;
+    color: white;
+}
+.btn-login:hover {
+    background-color: rgba(76, 175, 80, 0.1);
 }
 
-
-/* Hamburger Menu */
+/* Botão Hamburger - inicialmente escondido */
 #hamburger-btn {
-    display: none; /* Esconde em desktop */
+    display: none;
     background: none;
     border: none;
     cursor: pointer;
-    padding: 5px;
+    padding: 10px;
     z-index: 1001;
 }
 
@@ -137,361 +118,333 @@ body {
     width: 25px;
     height: 3px;
     background-color: var(--secondary-color);
-    margin: 4px 0;
-    transition: transform 0.3s ease;
+    margin: 5px 0;
+    transition: all 0.3s ease;
 }
 
-
-/* ----------------------------------
- * 2. SEÇÕES PRINCIPAIS
- * ---------------------------------- */
-section {
-    padding: 80px 0;
-}
 
 /* Seção Hero */
 .hero-section {
-    background-color: #e8f5e9; /* Fundo suave */
+    background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1487875961445-47a00398c267?q=80&w=2070&auto=format&fit=crop') no-repeat center center/cover;
+    color: white;
     text-align: center;
     padding: 100px 0;
-    border-bottom: 5px solid var(--primary-color);
 }
 
 .hero-section h1 {
     font-size: 3rem;
-    color: var(--primary-color);
-    margin-bottom: 10px;
+    margin-bottom: 1rem;
 }
 
 .hero-section .subtitle {
-    font-size: 1.25rem;
-    color: var(--secondary-color);
-    margin-bottom: 30px;
-    max-width: 700px;
-    margin-left: auto;
-    margin-right: auto;
+    font-size: 1.2rem;
+    max-width: 600px;
+    margin: 0 auto 2rem;
 }
 
 .hero-buttons a {
-    text-decoration: none;
-    padding: 12px 25px;
-    border-radius: 8px;
-    font-weight: 600;
-    margin: 0 10px;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    margin: 0.5rem;
 }
 
-.hero-buttons .btn-principal {
+.btn-principal {
     background-color: var(--primary-color);
     color: white;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    padding: 15px 30px;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+    display: inline-block;
 }
 
-.hero-buttons .btn-secundario {
-    background-color: var(--accent-color);
+.btn-principal:hover {
+    background-color: #45a049;
+}
+
+.btn-secundario {
+    background-color: orange;
     color: white;
+    padding: 15px 30px;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+    display: inline-block;
 }
 
-.hero-buttons a:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.25);
+.btn-secundario:hover {
+    background-color: rgb(207, 135, 2);
 }
 
-/* Seção Stats */
+/* Seção de Destaques (Stats) */
 .stats-section {
-    background-color: var(--container-bg);
-    text-align: center;
-    border-bottom: 1px solid #ddd;
+    padding: 60px 0;
+    background-color: #f9f9f9; /* Um fundo sutil para diferenciar */
 }
 
 .stats-grid {
     display: flex;
     justify-content: space-around;
-    gap: 20px;
+    flex-wrap: wrap;
+    gap: 20px; /* Espaçamento entre os cards */
 }
 
 .stat-card {
-    flex: 1;
-    padding: 20px;
-    background-color: #fafafa;
-    border-radius: 10px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    text-align: center;
+    padding: 30px;
+    flex: 1; /* Faz os cards ocuparem o espaço igualmente */
+    min-width: 250px; /* Largura mínima antes de quebrar a linha */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0,0,0,0.1);
 }
 
 .stat-number {
     font-size: 2.5rem;
-    font-weight: 700;
-    color: var(--accent-color);
-    margin-bottom: 5px;
+    font-weight: bold;
+    color: var(--primary-color);
+    margin-bottom: 10px;
 }
 
 .stat-description {
-    color: var(--secondary-color);
-    font-size: 0.9rem;
+    font-size: 1rem;
+    color: #666;
 }
 
-/* Seção Importance (Imagem e Texto) */
+/* Seção de Importância */
 .importance-section {
-    background-color: #f9f9f9;
+    padding: 80px 0;
+    background-color: var(--container-bg);
 }
 
 .importance-content {
     display: flex;
     align-items: center;
-    gap: 40px;
+    gap: 50px;
 }
 
-.importance-text, .importance-image {
+.importance-text {
     flex: 1;
 }
 
 .importance-text h2 {
-    font-size: 2.2rem;
+    font-size: 2.5rem;
     color: var(--primary-color);
-    margin-top: 0;
+    margin-bottom: 20px;
+}
+
+.importance-text p {
+    font-size: 1.1rem;
+    line-height: 1.7;
+    margin-bottom: 15px;
+}
+
+.importance-image {
+    flex: 1;
+    max-width: 500px;
 }
 
 .importance-image img {
-    max-width: 100%;
-    height: auto;
-    border-radius: 10px;
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+    width: 100%;
+    border-radius: 8px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
 }
+
 
 /* Seção Sobre Nós */
 .about-section {
+    padding: 60px 20px;
+    background: #f9f9f9;
     text-align: center;
 }
-.about-section h2 {
-    color: var(--primary-color);
+.about-section h2, .form-section h2 {
+    font-size: 2.5rem;
     margin-bottom: 20px;
+    color: var(--primary-color);
 }
 .about-section p {
     max-width: 800px;
     margin: 0 auto;
     font-size: 1.1rem;
-    line-height: 1.8;
 }
 
-
-/* ----------------------------------
- * 3. FORMS (Login e Cadastro)
- * ---------------------------------- */
+/* Seções de Formulário (Login/Cadastro) */
 .form-section {
-    padding: 50px 0;
-    text-align: center;
+    padding: 60px 20px;
 }
 
 .form-container {
-    max-width: 400px;
-    background-color: var(--container-bg);
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    max-width: 500px;
     margin: 0 auto;
+    background: white;
+    padding: 40px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    border-radius: 8px;
 }
 
 .form-container h2 {
-    color: var(--primary-color);
-    margin-top: 0;
-    margin-bottom: 20px;
-    font-size: 1.8rem;
-}
-
-.form-container form {
-    display: flex;
-    flex-direction: column;
-    text-align: left;
+    text-align: center;
 }
 
 .form-container label {
-    margin-top: 15px;
+    display: block;
     margin-bottom: 5px;
-    font-weight: 600;
+    font-weight: 500;
 }
 
-.form-container input[type="text"],
-.form-container input[type="email"],
-.form-container input[type="password"] {
-    padding: 10px;
+.form-container input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 20px;
     border: 1px solid #ccc;
     border-radius: 5px;
-    font-size: 1rem;
-    transition: border-color 0.3s ease;
+    box-sizing: border-box; 
 }
 
-.form-container input:focus {
-    border-color: var(--primary-color);
-    outline: none;
-}
-
-.form-container button[type="submit"] {
+.form-container button {
+    width: 100%;
+    padding: 15px;
+    border: none;
     background-color: var(--primary-color);
     color: white;
-    padding: 12px;
-    border: none;
+    font-size: 1rem;
+    font-weight: bold;
     border-radius: 5px;
     cursor: pointer;
-    font-size: 1.1rem;
-    font-weight: 600;
-    margin-top: 25px;
     transition: background-color 0.3s ease;
 }
 
-.form-container button[type="submit"]:hover {
-    background-color: #388e3c;
+.form-container button:hover {
+    background-color: #45a049;
 }
-
 .form-switch {
-    margin-top: 15px;
-    font-size: 0.95rem;
+    text-align: center;
+    margin-top: 20px;
 }
-
 .form-switch a {
     color: var(--primary-color);
     text-decoration: none;
-    font-weight: 600;
-    transition: color 0.3s ease;
-}
-
-.form-switch a:hover {
-    text-decoration: underline;
-}
-
-/* Feedback de Autenticação */
-.form-feedback {
-    margin: 15px 0 0; /* Ajustado para melhor espaçamento */
-    padding: 10px;
-    border-radius: 5px;
-    text-align: center;
     font-weight: bold;
-    display: block; 
-}
-.form-feedback.error {
-    background-color: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
-}
-.form-feedback.success {
-    background-color: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
-}
-.form-feedback.loading {
-    background-color: #fff3cd;
-    color: #856404;
 }
 
-/* ----------------------------------
- * 4. FOOTER
- * ---------------------------------- */
+
+/* Footer */
 .footer {
-    background-color: var(--secondary-color); /* CRÍTICO: Cor de fundo escuro para o footer */
+    background: var(--secondary-color);
     color: white;
     text-align: center;
     padding: 20px 0;
-    font-size: 0.9rem;
 }
 
+/* ======================================================= */
+/* ============= MEDIA QUERIES RESPONSIVAS =============== */
+/* ======================================================= */
 
-/* ----------------------------------
- * 5. RESPONSIVIDADE (Celular)
- * ---------------------------------- */
-@media (max-width: 992px) {
+/* Telas de Tablet (até 768px) */
+@media (max-width: 768px) {
     .navbar nav {
+        display: none; 
         position: absolute;
-        top: 70px; /* Alinhado após o navbar */
+        top: 70px; 
         left: 0;
         width: 100%;
         background-color: var(--container-bg);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        display: none; /* Escondido por padrão */
-        flex-direction: column;
-        padding: 10px 0;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
-
+    
     .navbar nav.active {
-        display: flex; /* Mostra quando a classe 'active' é ativada pelo JS */
+        display: block; 
     }
 
     .navbar nav ul {
         flex-direction: column; 
         width: 100%;
-        align-items: flex-start;
     }
 
     .navbar nav ul li {
         margin: 0;
         width: 100%;
-        border-bottom: 1px solid #eee;
-    }
-
-    .navbar nav ul li:last-child {
-        border-bottom: none;
+        text-align: center;
     }
 
     .navbar nav ul li a {
         display: block;
-        padding: 1rem 20px;
-        color: var(--secondary-color);
+        padding: 1rem;
+        border-bottom: 1px solid #eee;
     }
-    
-    .navbar nav ul li .btn-login,
-    .navbar nav ul li .btn-cadastro {
-        margin: 0;
-        border: none; /* Remove a borda no menu mobile */
-        background-color: transparent;
-        color: var(--secondary-color);
-        padding: 1rem 20px;
-    }
-    
-    .navbar nav ul li .btn-cadastro {
-        /* Para manter a cor do cadastro no menu */
-        background-color: var(--primary-color);
-        color: white;
-        text-align: center;
-    }
-
 
     #hamburger-btn {
-        display: block; /* Mostra o botão em telas menores */
+        display: block; 
+    }
+
+    .hero-section h1 {
+        font-size: 2.5rem;
+    }
+
+    .hero-section .subtitle {
+        font-size: 1.1rem;
+    }
+
+    .about-section h2, .form-section h2 {
+        font-size: 2rem;
     }
 
     .importance-content {
-        flex-direction: column; /* Coloca a imagem sob o texto */
+        flex-direction: column; /* Coloca o texto sobre a imagem */
         text-align: center;
     }
-    
-    .stats-grid {
-        flex-direction: column;
-        gap: 15px;
+
+    .importance-text h2 {
+        font-size: 2rem;
     }
-    
-    .stat-card {
-        max-width: 300px;
-        margin: 0 auto;
-    }
-    
 }
 
 /* Telas de Celular (até 480px) */
 @media (max-width: 480px) {
-    .hero-section h1 {
-        font-size: 2.2rem;
+    body {
+        padding-top: 60px; 
     }
     
-    .hero-buttons {
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
+    .navbar{
+        padding: 0.5rem 0;
     }
     
-    .hero-buttons a {
-        margin: 0;
+    .hero-section {
+        padding: 60px 20px;
     }
 
-    .importance-text h2 {
-        font-size: 1.8rem;
+    .hero-section h1 {
+        font-size: 2rem;
+    }
+
+    .hero-section .subtitle {
+        font-size: 1rem;
     }
     
+    /* Faz os botões ficarem um embaixo do outro */
+    .hero-buttons a {
+        display: block;
+        width: 80%;
+        margin: 1rem auto;
+    }
+
+    .form-container {
+        padding: 20px;
+    }
+
+    .stat-card {
+        width: 100%; /* Faz cada card ocupar a largura total */
+    }
+
+    .stats-section, .importance-section {
+        padding: 40px 20px;
+    }
 }

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CCE - Área Logada</title>
+    <link rel="stylesheet" href="styles/area-logada.css">
+    <link rel="icon" type="image/png" href="src/images/icon.png">
+</head>
+<body>
+    <!-- HEADER -->
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <svg class="logo-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="32" cy="32" r="30" stroke="currentColor" stroke-width="4" fill="none"/>
+                    <path fill="currentColor" d="M26 14l-9 18h11l-5 18 18-27H31l5-9z"/>
+                </svg>
+                CCE
+            </div>
+            <div class="user-area">
+                <div class="user-info">
+                    <div class="user-avatar" id="userAvatar">U</div>
+                    <span class="user-name" id="userName">Usuário</span>
+                </div>
+                <button class="btn-logout" onclick="logout()">Sair</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+        <!-- DASHBOARD DE RESIDÊNCIAS -->
+        <div id="dashboardView">
+            <div class="page-header">
+                <h1>Minhas Residências</h1>
+                <p>Gerencie o consumo de energia de todas as suas residências</p>
+            </div>
+
+            <div class="residencias-grid" id="residenciasGrid">
+                <!-- Residências serão inseridas aqui pelo JavaScript -->
+                <div class="residencia-card add-residencia-card" onclick="openModalResidencia()">
+                    <div class="add-icon">+</div>
+                    <div class="add-text">Adicionar Residência</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW DA RESIDÊNCIA -->
+        <div id="residenciaView" class="residencia-view">
+            <div class="breadcrumb">
+                <a href="#" onclick="voltarDashboard()">← Voltar para Residências</a>
+            </div>
+
+            <div class="residencia-header">
+                <div class="residencia-header-content">
+                    <img id="residenciaImagemDetalhe" class="residencia-header-image" src="" alt="">
+                    <div class="residencia-header-info">
+                        <h2 id="residenciaNomeDetalhe"></h2>
+                        <p style="color: var(--text-light);">Gerencie os aparelhos desta residência</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="aparelhos-section">
+                <div class="section-title">
+                    <h3>Aparelhos Cadastrados</h3>
+                    <button class="btn-add" onclick="openModalAparelho()">
+                        <span>+</span> Adicionar Aparelho
+                    </button>
+                </div>
+
+                <div class="aparelhos-grid" id="aparelhosGrid">
+                    <!-- Aparelhos serão inseridos aqui -->
+                </div>
+
+                <div id="emptyState" class="empty-state" style="display: none;">
+                    <div class="empty-icon">💡</div>
+                    <div class="empty-text">Nenhum aparelho cadastrado ainda</div>
+                    <button class="btn-primary" onclick="openModalAparelho()" style="max-width: 300px; margin: 0 auto;">
+                        Adicionar Primeiro Aparelho
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <p>&copy; 2025 CCE - Controle de Consumo Energético. Todos os direitos reservados.</p>
+    </footer>
+
+    <!-- MODAL CADASTRAR RESIDÊNCIA -->
+    <div id="modalResidencia" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModalResidencia()">×</button>
+            <div class="modal-header">
+                <h2>Nova Residência</h2>
+                <p style="color: var(--text-light);">Cadastre uma nova residência para monitoramento</p>
+            </div>
+
+            <form id="formResidencia" onsubmit="cadastrarResidencia(event)">
+                <div class="form-group">
+                    <label for="nomeResidencia">Nome da Residência *</label>
+                    <input type="text" id="nomeResidencia" placeholder="Ex: Casa Principal, Apartamento, Sítio..." required>
+                </div>
+
+                <div class="form-group">
+                    <label>Escolha um ícone *</label>
+                    <div class="image-selector" id="imageSelector">
+                        <label class="image-option">
+                            <input type="radio" name="imagemResidencia" value="casa" required>
+                            <img src="https://img.icons8.com/fluency/96/home.png" alt="Casa">
+                        </label>
+                        <label class="image-option">
+                            <input type="radio" name="imagemResidencia" value="apartamento">
+                            <img src="https://img.icons8.com/fluency/96/building.png" alt="Apartamento">
+                        </label>
+                        <label class="image-option">
+                            <input type="radio" name="imagemResidencia" value="sitio">
+                            <img src="https://img.icons8.com/fluency/96/cottage.png" alt="Sítio">
+                        </label>
+                        <label class="image-option">
+                            <input type="radio" name="imagemResidencia" value="comercial">
+                            <img src="https://img.icons8.com/fluency/96/shop.png" alt="Comercial">
+                        </label>
+                        <label class="image-option">
+                            <input type="radio" name="imagemResidencia" value="escritorio">
+                            <img src="https://img.icons8.com/fluency/96/office.png" alt="Escritório">
+                        </label>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary">Cadastrar Residência</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL CADASTRAR APARELHO -->
+    <div id="modalAparelho" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModalAparelho()">×</button>
+            <div class="modal-header">
+                <h2>Novo Aparelho</h2>
+                <p style="color: var(--text-light);">Adicione um aparelho para calcular o consumo</p>
+            </div>
+
+            <form id="formAparelho" onsubmit="cadastrarAparelho(event)">
+                <div class="form-group">
+                    <label for="nomeAparelho">Nome do Aparelho *</label>
+                    <input type="text" id="nomeAparelho" placeholder="Ex: Geladeira, TV, Ar Condicionado..." required>
+                </div>
+
+                <div class="form-group">
+                    <label for="potenciaAparelho">Potência (Watts) *</label>
+                    <input type="number" id="potenciaAparelho" placeholder="Ex: 1500" required min="1">
+                </div>
+
+                <div class="form-group">
+                    <label for="horasUso">Horas de uso por dia *</label>
+                    <input type="number" id="horasUso" placeholder="Ex: 8" required min="0" max="24" step="0.5">
+                </div>
+
+                <button type="submit" class="btn-primary">Adicionar Aparelho</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="scripts/area-logada.js"></script>
+</body>
+</html>

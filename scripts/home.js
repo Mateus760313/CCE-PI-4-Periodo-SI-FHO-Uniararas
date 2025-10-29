@@ -1,10 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Se veio de um logout, mostra mensagem rápida na landing
-    if (localStorage.getItem('logged_out') === '1') {
-        localStorage.removeItem('logged_out');
-        // Mensagem simples — pode ser substituída por um toast/elemento UI mais elegante
-        alert('Você saiu com sucesso.');
-    }
     // VARIÁVEIS DE ELEMENTOS
     const loginSection = document.getElementById('login');
     const cadastroSection = document.getElementById('cadastro');
@@ -107,7 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // REDIRECIONA EM CASO DE SUCESSO
             setTimeout(() => {
-                window.location.href = 'area-logada.html';
+                window.location.href = 'calculadora.html';
             }, 1000); 
 
         } else {
@@ -138,33 +132,12 @@ document.addEventListener('DOMContentLoaded', () => {
             // Requisição Fetch para o arquivo PHP
             const response = await fetch('processar_auth.php', {
                 method: 'POST',
-                body: formData,
-                credentials: 'same-origin' // garante envio/recebimento de cookies de sessão
+                body: formData
             });
 
-            // Lê a resposta como texto primeiro para evitar exceções se o servidor
-            // emitir avisos/HTML antes do JSON (isso quebra response.json()).
-            const text = await response.text();
-            let data;
-            try {
-                data = JSON.parse(text);
-            } catch (err) {
-                // Resposta inválida do servidor
-                console.error('Resposta inválida do servidor:', text);
-                feedbackElement.classList.remove('loading');
-                feedbackElement.classList.add('error');
-                feedbackElement.textContent = 'Resposta inválida do servidor. Verifique o console.';
-                submitButton.disabled = false;
-                return;
-            }
-
-            // Se o servidor retornou um status HTTP de erro, mostra a mensagem do JSON
-            if (!response.ok) {
-                const msg = data.mensagem || ('Erro: ' + response.status);
-                handleAuthResponse(form, { sucesso: false, mensagem: msg });
-            } else {
-                handleAuthResponse(form, data);
-            }
+            // O PHP deve retornar um JSON
+            const data = await response.json();
+            handleAuthResponse(form, data);
 
         } catch (error) {
             console.error('Erro de conexão ou JSON inválido:', error);

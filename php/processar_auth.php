@@ -52,6 +52,14 @@ if ($acao === 'cadastro') {
             ':email' => $email,
             ':senha_hash' => $senha_hash
         ]);
+
+        // Pega o ID do usuário recém inserido
+        $usuario_id = $pdo->lastInsertId();
+        
+        // Cria a sessão do usuário após o cadastro
+        $_SESSION['usuario_id'] = $usuario_id;
+        $_SESSION['usuario_nome'] = $nome;
+        $_SESSION['usuario_email'] = $email;
         
         echo json_encode(['sucesso' => true, 'mensagem' => 'Cadastro realizado com sucesso!']);
         

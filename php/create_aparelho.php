@@ -27,17 +27,25 @@ if ($residenciaId <= 0 || $nome === '' || $potencia <= 0) {
 }
 
 try {
-    // Opcional: verificar se a residência pertence ao usuário
+    error_log("Tentando criar aparelho - usuarioId: $usuarioId, residenciaId: $residenciaId, nome: $nome, potencia: $potencia, horas: $horas");
+    
+    // Verificar se a residência pertence ao usuário
     $check = $pdo->prepare("SELECT id FROM residencias WHERE id = :rid AND usuario_id = :uid");
     $check->execute([':rid'=>$residenciaId, ':uid'=>$usuarioId]);
+    
     if (!$check->fetch()) {
+        error_log("Erro: Residência $residenciaId não pertence ao usuário $usuarioId");
         http_response_code(403);
         echo json_encode(['sucesso'=>false,'mensagem'=>'Residência inválida']);
         exit;
     }
+    
+    error_log("Residência verificada com sucesso");
 
     $sql = "INSERT INTO aparelhos (residencia_id, usuario_id, nome, potencia_watts, horas_uso) VALUES (:rid, :uid, :nome, :pot, :horas) RETURNING id";
+    error_log("SQL preparado: $sql");
     $stmt = $pdo->prepare($sql);
+    error_log("Executando insert com os valores - rid:$residenciaId, uid:$usuarioId, nome:$nome, pot:$potencia, horas:$horas");
     $stmt->execute([
         ':rid' => $residenciaId,
         ':uid' => $usuarioId,

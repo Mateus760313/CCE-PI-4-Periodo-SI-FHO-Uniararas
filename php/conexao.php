@@ -1,4 +1,9 @@
 <?php
+// Habilitar exibição de erros
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 // Arquivo responsável apenas pela conexão com o banco de dados.
 // Não iniciamos a sessão aqui para evitar avisos caso o arquivo seja incluído
 // após session_start() em outros scripts.
@@ -13,8 +18,10 @@ $port = '5432';
 $pdo = null;
 
 try {
+    error_log("Tentando conectar ao PostgreSQL: host=$host dbname=$dbname user=$user port=$port");
     $pdo = new PDO("pgsql:host=$host;port=$port;dbname=$dbname;user=$user;password=$password");
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    error_log("Conexão PostgreSQL estabelecida com sucesso");
 } catch (PDOException $e) {
     header('Content-Type: application/json');
     $mensagem = "Erro de conexão com o banco de dados: " . $e->getMessage();

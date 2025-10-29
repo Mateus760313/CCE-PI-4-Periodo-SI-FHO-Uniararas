@@ -1,7 +1,7 @@
 <?php
 session_start();
 header('Content-Type: application/json');
-require 'conexao.php';
+require __DIR__ . '/conexao.php';
 
 $usuarioId = $_SESSION['usuario_id'] ?? null;
 if (!$usuarioId) {

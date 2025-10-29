@@ -2,12 +2,12 @@
 -- PostgreSQL database dump
 --
 
-\restrict CZx8oiaNH6fnDC2If9raFmubkRtj7tLqhBJ6OLfcGZQGaykBahdQbbKrzFlbiQd
+\restrict 80wR1UaGxRdNOc8Prx6C8ttsDZP92Jlpjf74qqj33vqxHkXCUhhzKfdz4qD6Krr
 
 -- Dumped from database version 18.0
 -- Dumped by pg_dump version 18.0
 
--- Started on 2025-10-15 16:48:05
+-- Started on 2025-10-29 19:03:25
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -24,6 +24,90 @@ SET row_security = off;
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
+
+--
+-- TOC entry 224 (class 1259 OID 24614)
+-- Name: aparelhos; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.aparelhos (
+    id bigint NOT NULL,
+    residencia_id bigint NOT NULL,
+    usuario_id integer NOT NULL,
+    nome character varying(150) NOT NULL,
+    potencia_watts integer NOT NULL,
+    horas_uso double precision NOT NULL,
+    data_criacao timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT aparelhos_horas_uso_check CHECK (((horas_uso >= (0)::double precision) AND (horas_uso <= (24)::double precision))),
+    CONSTRAINT aparelhos_potencia_watts_check CHECK ((potencia_watts > 0))
+);
+
+
+ALTER TABLE public.aparelhos OWNER TO postgres;
+
+--
+-- TOC entry 223 (class 1259 OID 24613)
+-- Name: aparelhos_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.aparelhos_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.aparelhos_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 5046 (class 0 OID 0)
+-- Dependencies: 223
+-- Name: aparelhos_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.aparelhos_id_seq OWNED BY public.aparelhos.id;
+
+
+--
+-- TOC entry 222 (class 1259 OID 24596)
+-- Name: residencias; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.residencias (
+    id bigint NOT NULL,
+    usuario_id integer NOT NULL,
+    nome character varying(150) NOT NULL,
+    imagem character varying(150) NOT NULL,
+    data_criacao timestamp without time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+
+ALTER TABLE public.residencias OWNER TO postgres;
+
+--
+-- TOC entry 221 (class 1259 OID 24595)
+-- Name: residencias_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.residencias_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.residencias_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 5047 (class 0 OID 0)
+-- Dependencies: 221
+-- Name: residencias_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.residencias_id_seq OWNED BY public.residencias.id;
+
 
 --
 -- TOC entry 220 (class 1259 OID 16390)
@@ -58,7 +142,7 @@ CREATE SEQUENCE public.usuarios_id_seq
 ALTER SEQUENCE public.usuarios_id_seq OWNER TO postgres;
 
 --
--- TOC entry 5016 (class 0 OID 0)
+-- TOC entry 5048 (class 0 OID 0)
 -- Dependencies: 219
 -- Name: usuarios_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -67,7 +151,23 @@ ALTER SEQUENCE public.usuarios_id_seq OWNED BY public.usuarios.id;
 
 
 --
--- TOC entry 4856 (class 2604 OID 16393)
+-- TOC entry 4870 (class 2604 OID 24617)
+-- Name: aparelhos id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.aparelhos ALTER COLUMN id SET DEFAULT nextval('public.aparelhos_id_seq'::regclass);
+
+
+--
+-- TOC entry 4868 (class 2604 OID 24599)
+-- Name: residencias id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.residencias ALTER COLUMN id SET DEFAULT nextval('public.residencias_id_seq'::regclass);
+
+
+--
+-- TOC entry 4866 (class 2604 OID 16393)
 -- Name: usuarios id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -75,7 +175,38 @@ ALTER TABLE ONLY public.usuarios ALTER COLUMN id SET DEFAULT nextval('public.usu
 
 
 --
--- TOC entry 5010 (class 0 OID 16390)
+-- TOC entry 5040 (class 0 OID 24614)
+-- Dependencies: 224
+-- Data for Name: aparelhos; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.aparelhos (id, residencia_id, usuario_id, nome, potencia_watts, horas_uso, data_criacao) FROM stdin;
+3	2	37	Geladeira	240	24	2025-10-29 18:43:40.756064
+4	2	37	Ar condicionado	2000	1	2025-10-29 18:43:47.893009
+5	3	38	Ares condicionados	1500	12	2025-10-29 18:44:45.307438
+6	4	40	Makita	20000	12	2025-10-29 18:46:40.503947
+7	4	40	Geladeira LG	1500	24	2025-10-29 18:50:27.923954
+8	4	40	Computadores	200	12	2025-10-29 18:52:57.335939
+9	1	3	Geladeira da churrasqueira	225	24	2025-10-29 19:01:23.843208
+\.
+
+
+--
+-- TOC entry 5038 (class 0 OID 24596)
+-- Dependencies: 222
+-- Data for Name: residencias; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.residencias (id, usuario_id, nome, imagem, data_criacao) FROM stdin;
+1	3	Casa Araras	casa	2025-10-29 18:42:19.97539
+2	37	Apartamento praia	apartamento	2025-10-29 18:43:34.257766
+3	38	Escritorio ADC	escritorio	2025-10-29 18:44:30.493815
+4	40	Casa usina	casa	2025-10-29 18:46:31.683054
+\.
+
+
+--
+-- TOC entry 5036 (class 0 OID 16390)
 -- Dependencies: 220
 -- Data for Name: usuarios; Type: TABLE DATA; Schema: public; Owner: postgres
 --
@@ -90,20 +221,81 @@ COPY public.usuarios (id, nome, email, senha_hash, data_cadastro) FROM stdin;
 7	Bruno Costa	bruno.costa@teste.com	$2a$10$ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefgh         	2025-10-14 01:57:24.036535
 8	Carla Souza	carla.souza@teste.com	$2a$10$9876543210zyxwuvtsrqponmlkjihgfedcbaZYXWVUTSRQ       	2025-10-14 01:57:24.036535
 9	Daniel Almeida	daniel.almeida@teste.com	$2a$10$FEDCBA9876543210zyxwuvtsrqponmlkjihgfedcbaZYXW       	2025-10-14 01:57:24.036535
+10	Joaquim Phoenix	joaquimphoenix@outlook.com	$2y$10$Kg7SJj7qYGuLsbXP9Xxxb.rK350F5fTeuXnGAaLEjZCYEKry3ui36	2025-10-28 18:15:53.165872
+11	Jean Pierre	jeansilva@gmail.com	$2y$10$kS2YirZsaykfAePwHaqWZOEaAm.dQXc1zXT7iq5jLMA/GkZbxPWHu	2025-10-28 18:25:09.124246
+13	Jean Pierre Ka	jeansilva22@gmail.com	$2y$10$M50E43gnuTWlLjAtD2hO0.ywD3fTwU7r9IZXHMXIEdiIeF6kYkSVi	2025-10-28 18:25:45.575379
+14	Mateus Fogagnoli	mateusxamps24@gmail.com	$2y$10$w1PmoEFXVMhdbE5QoKVgQOWAPAV5xGLjoe1ZgZ.Uuc9zwPkdd3ugW	2025-10-28 19:50:39.961507
+15	Camili Silva	seuemail@exemplo.com	$2y$10$FLoLkq6OYjLVQ36n2vj4PuEGAk0cmPL2JPS24t2vd5qtsXuj8EAqC	2025-10-28 20:01:43.335702
+16	Jean Pierre	jeansilvamma@gmail.com	$2y$10$brbaVPBYwVkvoVwb.Syn5eQqtwbF7gvg4FkxCxwHHoDJLetUffw16	2025-10-28 20:02:30.575819
+17	Gabriel Brandino	gabrielbrandino@gmail.com	$2y$10$P4WOGLiqC4Tv8YANM1hH1uYulrM68p3c6D2WMdTt15fCyaPyxoVMK	2025-10-28 20:04:02.989771
+18	Mateus Xamps	ggilsilva@outlook.com	$2y$10$Fd9P3uFmpaDAmr3zuJ1.neB8g41ulz2EX4INJylgVQ50GtMvq.JiO	2025-10-28 20:05:27.670897
+21	Mateus Xamps	gilsilva24@gmail.com	$2y$10$Y7MAUQ.CHvMLbur3wZnf.OmXgpJLISzC5j.B0YBEsLVCHSdgPqz6S	2025-10-28 20:05:56.366041
+22	henrique	alexandrepereira@gmail.com	$2y$10$XY12y1iP7W2ny5pOJMMEn.gaRP8Ed4fuBGVkWIawSLjh78tLGcqTu	2025-10-28 20:08:16.091128
+24	henrique pereira	mateusxamp22p@gmail.com	$2y$10$QM2VWwQlQSHhZPPY8pzH4uNu0FZpURfDqlCtX5zTSRMlucOCZ7FVi	2025-10-29 00:29:41.462766
+26	Gilberto Pereira	gilsilvapereira@yahoo.com.br	$2y$10$RLdxYYROE5eXQTDuhcbTHuV1OVrkvpjnmlMly/fcr0FcTHbeuPZw2	2025-10-29 00:32:08.48147
+27	Mateus Xampinho	mateuspenteneiro@gmail.com	$2y$10$vI.uFWp6w.r42IME13mbDe1LXjPfHWm79N6pB5Qiuiy8XTL9BS.EO	2025-10-29 00:37:29.790228
+28	Alex do Bronx	alexpoatanpereira@gmail.com	$2y$10$dC3f5G5X/Eyl0C674OCnOO3vRiumQPJJVTKVDJDv.uFX27iSTvgNa	2025-10-29 00:41:02.269667
+29	Gabriel Brandinoso	gabrielpereirabrandino@gmail.com	$2y$10$2HFWEPvIYl/zj.rsANou/.2Tc4Afndwk4v6wIZmwfiuN4.uvdhVHe	2025-10-29 00:46:56.982075
+30	Diego Negresco	diegonegretto@gmail.com	$2y$10$bXN3heexoVeGLWtFP//qROhF52O5fhHEQ4IiPiguENhQbF8CAlstS	2025-10-29 00:53:52.222116
+31	Eduardo Penaldo	edubennett@gmail.com	$2y$10$40wUo28t6fslRJ8vOasNbOLiGb/loYUhFgVtU6DA4CeTc0CffT9tS	2025-10-29 16:43:56.661536
+33	Mateus Xamps	mateusxampp123@gmail.com	$2y$10$ECK.kU0fvjK/dl9qXLlmwu21lGBnZDNOjs9EOD0pqVQEO.kURffdK	2025-10-29 16:55:16.498707
+34	Mateus Xamps	mateusxampp1223@gmail.com	$2y$10$5ha.bEewVw/exxocWdetyubmRiRJci33UwmRcvDIw1J7hcBbGLSB6	2025-10-29 16:56:37.770551
+35	Joaquim Galileu	alisteu@gmail.com	$2y$10$o5yxw2haXABAhFMvl41EwOpf9VzrgHaV2zEMXUB0Keso6HmqL8UwG	2025-10-29 16:58:08.374164
+36	Jean Pierre Polnaref	jotarokujo@gmail.com	$2y$10$gtrsFQUCG/guW0RSj6B/1uX9TLv2sDvtkdSmQFRQnYYg98Owc7L/m	2025-10-29 16:59:29.881756
+37	Mateus Xampo	mateusxampo@gmail.com	$2y$10$UepRbClyC/ML4SrgmmDdgeWiqmGs8h8H7JZJkC7/DOuZSFiSzGf1K	2025-10-29 17:01:26.084043
+38	Andre Mourinho	andmoura45@outlook.com	$2y$10$OKYO2t1Bbs1ykCkb0rYM2OdEj5wjUM/N4dRnNeBkkbZMUs9QwLjfS	2025-10-29 17:03:48.37452
+39	Pedrinho Silva	pedrinhosilva@gmail.com	$2y$10$VGOgOEemeAD0EvasUcPouO0uvc.IzSTSmqYUXHGSDMP6E820KXH2O	2025-10-29 18:39:03.859365
+40	Gil Silveirino	gilsilveirino@gmail.com	$2y$10$q7U8BlXdJcLR8ubZa5i8BeV/wMoOZZdm/33WQduPBTRoUBiTPb7SG	2025-10-29 18:46:26.399248
 \.
 
 
 --
--- TOC entry 5017 (class 0 OID 0)
+-- TOC entry 5049 (class 0 OID 0)
+-- Dependencies: 223
+-- Name: aparelhos_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.aparelhos_id_seq', 9, true);
+
+
+--
+-- TOC entry 5050 (class 0 OID 0)
+-- Dependencies: 221
+-- Name: residencias_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.residencias_id_seq', 4, true);
+
+
+--
+-- TOC entry 5051 (class 0 OID 0)
 -- Dependencies: 219
 -- Name: usuarios_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.usuarios_id_seq', 9, true);
+SELECT pg_catalog.setval('public.usuarios_id_seq', 40, true);
 
 
 --
--- TOC entry 4859 (class 2606 OID 16402)
+-- TOC entry 4882 (class 2606 OID 24628)
+-- Name: aparelhos aparelhos_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.aparelhos
+    ADD CONSTRAINT aparelhos_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 4880 (class 2606 OID 24606)
+-- Name: residencias residencias_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.residencias
+    ADD CONSTRAINT residencias_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 4875 (class 2606 OID 16402)
 -- Name: usuarios usuarios_email_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -112,7 +304,7 @@ ALTER TABLE ONLY public.usuarios
 
 
 --
--- TOC entry 4861 (class 2606 OID 16400)
+-- TOC entry 4877 (class 2606 OID 16400)
 -- Name: usuarios usuarios_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -120,11 +312,62 @@ ALTER TABLE ONLY public.usuarios
     ADD CONSTRAINT usuarios_pkey PRIMARY KEY (id);
 
 
--- Completed on 2025-10-15 16:48:06
+--
+-- TOC entry 4883 (class 1259 OID 24639)
+-- Name: idx_aparelhos_residencia; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_aparelhos_residencia ON public.aparelhos USING btree (residencia_id);
+
+
+--
+-- TOC entry 4884 (class 1259 OID 24640)
+-- Name: idx_aparelhos_usuario; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_aparelhos_usuario ON public.aparelhos USING btree (usuario_id);
+
+
+--
+-- TOC entry 4878 (class 1259 OID 24612)
+-- Name: idx_residencias_usuario; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX idx_residencias_usuario ON public.residencias USING btree (usuario_id);
+
+
+--
+-- TOC entry 4886 (class 2606 OID 24629)
+-- Name: aparelhos fk_aparelhos_residencia; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.aparelhos
+    ADD CONSTRAINT fk_aparelhos_residencia FOREIGN KEY (residencia_id) REFERENCES public.residencias(id) ON DELETE CASCADE;
+
+
+--
+-- TOC entry 4887 (class 2606 OID 24634)
+-- Name: aparelhos fk_aparelhos_usuario; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.aparelhos
+    ADD CONSTRAINT fk_aparelhos_usuario FOREIGN KEY (usuario_id) REFERENCES public.usuarios(id) ON DELETE CASCADE;
+
+
+--
+-- TOC entry 4885 (class 2606 OID 24607)
+-- Name: residencias fk_residencia_usuario; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.residencias
+    ADD CONSTRAINT fk_residencia_usuario FOREIGN KEY (usuario_id) REFERENCES public.usuarios(id) ON DELETE CASCADE;
+
+
+-- Completed on 2025-10-29 19:03:25
 
 --
 -- PostgreSQL database dump complete
 --
 
-\unrestrict CZx8oiaNH6fnDC2If9raFmubkRtj7tLqhBJ6OLfcGZQGaykBahdQbbKrzFlbiQd
+\unrestrict 80wR1UaGxRdNOc8Prx6C8ttsDZP92Jlpjf74qqj33vqxHkXCUhhzKfdz4qD6Krr
 

@@ -25,8 +25,10 @@ if ($nome === '' || $imagem === '') {
 }
 
 try {
+    error_log("Tentando criar residência - usuarioId: $usuarioId, nome: $nome, imagem: $imagem");
     $sql = "INSERT INTO residencias (usuario_id, nome, imagem) VALUES (:usuario_id, :nome, :imagem) RETURNING id, data_criacao";
     $stmt = $pdo->prepare($sql);
+    error_log("SQL preparado: $sql");
     $stmt->execute([
         ':usuario_id' => $usuarioId,
         ':nome' => $nome,

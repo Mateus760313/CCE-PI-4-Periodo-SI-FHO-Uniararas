@@ -101,7 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // REDIRECIONA EM CASO DE SUCESSO
             setTimeout(() => {
-                window.location.href = 'calculadora.html';
+                window.location.href = 'area-logada.html';
             }, 1000); 
 
         } else {
@@ -130,7 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             // Requisição Fetch para o arquivo PHP
-            const response = await fetch('processar_auth.php', {
+            const response = await fetch('php/processar_auth.php', {
                 method: 'POST',
                 body: formData
             });

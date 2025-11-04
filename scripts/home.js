@@ -166,7 +166,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const recuperarForm = document.getElementById('recuperarForm');
     if (recuperarForm) {
         recuperarForm.addEventListener('submit', async (e) => {
+            // Segurança: impedir comportamento padrão e propagação
             e.preventDefault();
+            e.stopPropagation();
+            console.log('[recuperarForm] submit handler invoked');
             
             const formData = new FormData(recuperarForm);
             const feedbackElement = recuperarForm.querySelector('.form-feedback');
@@ -178,13 +181,31 @@ document.addEventListener('DOMContentLoaded', () => {
             submitButton.disabled = true;
             
             try {
+                console.log('[recuperarForm] sending fetch to php/recuperar_senha.php');
                 const response = await fetch('php/recuperar_senha.php', {
                     method: 'POST',
                     body: formData
                 });
                 
                 const data = await response.json();
-                handleAuthResponse(recuperarForm, data);
+                console.log('[recuperarForm] response', data);
+                // Tratar resposta do formulário de recuperação separadamente
+                // Para recuperação de senha não queremos redirecionar para area-logada.html
+                if (data.sucesso) {
+                    const feedbackElement = recuperarForm.querySelector('.form-feedback');
+                    feedbackElement.classList.remove('loading', 'error');
+                    feedbackElement.classList.add('success');
+                    feedbackElement.textContent = data.mensagem;
+                    submitButton.disabled = false;
+                    // Redirecionar para a página inicial com a âncora de login
+                    setTimeout(() => {
+                        console.log('[recuperarForm] redirecting to home.html#login');
+                        window.location.href = 'home.html#login';
+                    }, 1500);
+                } else {
+                    // Reaproveita o handler genérico para exibir erro
+                    handleAuthResponse(recuperarForm, data);
+                }
             } catch (error) {
                 console.error('Erro:', error);
                 feedbackElement.classList.remove('loading');

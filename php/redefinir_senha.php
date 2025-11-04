@@ -52,6 +52,9 @@ try {
     $stmt = $pdo->prepare("UPDATE recuperacao_senha SET usado = true WHERE token = :token");
     $stmt->execute([':token' => $token]);
 
+    // Destruir qualquer sessão existente
+    session_destroy();
+
     echo json_encode(['sucesso' => true, 'mensagem' => 'Senha atualizada com sucesso!']);
 
 } catch (PDOException $e) {

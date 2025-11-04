@@ -14,7 +14,7 @@
 // Deixe os valores vazios até você preencher localmente.
 define('SMTP_HOST', 'smtp.gmail.com');
 define('SMTP_USER', 'ccerecuperacao@gmail.com');
-define('SMTP_PASS', 'orqf fomd rjhz lswa');
+define('SMTP_PASS', '');
 define('SMTP_PORT', 587);
 define('SMTP_FROM', 'ccerecuperacao@gmail.com');
 define('SMTP_FROM_NAME', 'CCE - Controle de Consumo Energético');

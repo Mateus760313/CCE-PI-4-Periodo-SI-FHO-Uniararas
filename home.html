@@ -21,6 +21,7 @@
             <nav id="nav-menu">
                 <ul>
                     <li><a href="#hero">Início</a></li>
+                    <li><a href="#saiba-mais">Saiba Mais</a></li>
                     <li><a href="#sobre">Sobre Nós</a></li>
                     <li><a href="#login" class="btn-login">Login</a></li>
                     <li><a href="#cadastro" class="btn-cadastro">Cadastro</a></li>
@@ -41,7 +42,7 @@
                 <p class="subtitle">A ferramenta definitiva para entender e otimizar seus gastos com energia elétrica. Comece a economizar agora!</p>
                 <div class="hero-buttons">
                     <a href="#cadastro" class="btn-principal">Crie sua conta</a>
-                    <a href="calculadora.html" class="btn-secundario">Acessar o Simulador sem login</a>
+                    <a href="#saiba-mais" class="btn-secundario">Saiba mais</a>
                 </div>
             </div>
         </section>
@@ -94,6 +95,22 @@
             </div>
         </section>
 
+        <section id="saiba-mais" class="saiba-mais-section">
+            <div class="container">
+                <div class="saiba-mais-content">
+                    <div class="saiba-mais-image">
+                        <a href="src/images/exemplo-site.jpg" target="_blank" title="Clique para ver a imagem em tamanho completo">
+                            <img src="src/images/exemplo-site.jpg" alt="Exemplo de funcionalidades do site">
+                        </a>
+                    </div>
+                    <div class="saiba-mais-text">
+                        <h2>Descubra Mais Sobre Nossa Plataforma</h2>
+                        <p>Nossa plataforma oferece ferramentas intuitivas e eficientes para ajudar você a monitorar e otimizar seu consumo de energia. Com recursos avançados de análise e visualização, você terá total controle sobre seus gastos energéticos.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <section id="sobre" class="about-section">
             <div class="container">
                 <h2>Sobre Nós</h2>
@@ -116,7 +133,10 @@
                     <p class="form-feedback"></p> 
                     
                     <button type="submit">Entrar</button>
-                    <p class="form-switch">Não tem uma conta? <a href="#cadastro">Cadastre-se</a></p>
+                    <div class="form-links">
+                        <p class="forgot-password"><a href="#recuperar" id="forgotPasswordLink">Esqueci minha senha</a></p>
+                        <p class="form-switch">Não tem uma conta? <a href="#cadastro">Cadastre-se</a></p>
+                    </div>
                 </form>
             </div>
         </section>
@@ -138,6 +158,23 @@
 
                     <button type="submit">Cadastrar</button>
                     <p class="form-switch">Já possui uma conta? <a href="#login">Faça Login</a></p>
+                </form>
+            </div>
+        </section>
+
+        <section id="recuperar" class="form-section" style="display:none;">
+            <div class="container form-container">
+                <h2>Recuperar Senha</h2>
+                <form id="recuperarForm">
+                    <p>Digite seu email para receber um link de recuperação de senha.</p>
+                    
+                    <label for="email-recuperar">Email:</label>
+                    <input type="email" id="email-recuperar" name="email_recuperar" placeholder="seuemail@exemplo.com" required />
+
+                    <p class="form-feedback"></p> 
+
+                    <button type="submit">Enviar Link de Recuperação</button>
+                    <p class="form-switch">Lembrou sua senha? <a href="#login">Voltar para Login</a></p>
                 </form>
             </div>
         </section>

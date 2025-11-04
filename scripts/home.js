@@ -161,4 +161,46 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         console.error("Elemento 'cadastroForm' não encontrado. Verifique seu home.html.");
     }
+
+    // Adiciona listener para o formulário de recuperação de senha
+    const recuperarForm = document.getElementById('recuperarForm');
+    if (recuperarForm) {
+        recuperarForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(recuperarForm);
+            const feedbackElement = recuperarForm.querySelector('.form-feedback');
+            const submitButton = recuperarForm.querySelector('button[type="submit"]');
+            
+            feedbackElement.classList.remove('success', 'error');
+            feedbackElement.classList.add('loading');
+            feedbackElement.textContent = 'Processando...';
+            submitButton.disabled = true;
+            
+            try {
+                const response = await fetch('php/recuperar_senha.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                handleAuthResponse(recuperarForm, data);
+            } catch (error) {
+                console.error('Erro:', error);
+                feedbackElement.classList.remove('loading');
+                feedbackElement.classList.add('error');
+                feedbackElement.textContent = 'Erro ao conectar com o servidor';
+                submitButton.disabled = false;
+            }
+        });
+    }
+
+    // Adiciona listener para o link "Esqueci minha senha"
+    const forgotPasswordLink = document.getElementById('forgotPasswordLink');
+    if (forgotPasswordLink) {
+        forgotPasswordLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            showForm(document.getElementById('recuperar'));
+        });
+    }
 });

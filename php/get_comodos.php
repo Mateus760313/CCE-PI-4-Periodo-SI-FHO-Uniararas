@@ -27,7 +27,7 @@ try {
     }
 
     // Retorna lista de cômodos com contagem de aparelhos e placeholders para KPIs
-    $sql = "SELECT c.id, c.nome, c.residencia_id, c.imagem,
+    $sql = "SELECT c.id::integer AS id, c.nome, c.residencia_id::integer AS residencia_id, c.imagem,
                    COUNT(a.id) AS aparelho_count,
                    0::double precision AS consumo_total_kwh,
                    0::double precision AS custo_total_reais

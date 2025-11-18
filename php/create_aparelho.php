@@ -16,47 +16,44 @@ if (!$usuarioId) {
     exit;
 }
 
-$residenciaId = intval($_POST['residencia_id'] ?? 0);
+
+$comodoId = intval($_POST['comodo_id'] ?? 0);
 $nome = trim($_POST['nome'] ?? '');
 $potencia = intval($_POST['potencia'] ?? 0);
 $horas = floatval($_POST['horas'] ?? 0);
 
-if ($residenciaId <= 0 || $nome === '' || $potencia <= 0) {
+if ($comodoId <= 0 || $nome === '' || $potencia <= 0) {
     echo json_encode(['sucesso'=>false,'mensagem'=>'Dados inválidos']);
     exit;
 }
 
 try {
-    error_log("Tentando criar aparelho - usuarioId: $usuarioId, residenciaId: $residenciaId, nome: $nome, potencia: $potencia, horas: $horas");
-    
-    // Verificar se a residência pertence ao usuário
-    $check = $pdo->prepare("SELECT id FROM residencias WHERE id = :rid AND usuario_id = :uid");
-    $check->execute([':rid'=>$residenciaId, ':uid'=>$usuarioId]);
-    
-    if (!$check->fetch()) {
-        error_log("Erro: Residência $residenciaId não pertence ao usuário $usuarioId");
+    // Busca residencia_id pelo comodo_id e valida propriedade
+    $check = $pdo->prepare("SELECT c.residencia_id FROM comodos c JOIN residencias r ON r.id = c.residencia_id WHERE c.id = :cid AND r.usuario_id = :uid");
+    $check->execute([':cid'=>$comodoId, ':uid'=>$usuarioId]);
+    $row = $check->fetch(PDO::FETCH_ASSOC);
+    if (!$row) {
+        error_log("Erro: Cômodo $comodoId não pertence ao usuário $usuarioId");
         http_response_code(403);
-        echo json_encode(['sucesso'=>false,'mensagem'=>'Residência inválida']);
+        echo json_encode(['sucesso'=>false,'mensagem'=>'Cômodo inválido ou sem permissão']);
         exit;
     }
-    
-    error_log("Residência verificada com sucesso");
+    $residenciaId = $row['residencia_id'];
 
-    $sql = "INSERT INTO aparelhos (residencia_id, usuario_id, nome, potencia_watts, horas_uso) VALUES (:rid, :uid, :nome, :pot, :horas) RETURNING id";
-    error_log("SQL preparado: $sql");
+    $sql = "INSERT INTO aparelhos (residencia_id, usuario_id, comodo_id, nome, potencia_watts, horas_uso) VALUES (:rid, :uid, :cid, :nome, :pot, :horas) RETURNING id";
     $stmt = $pdo->prepare($sql);
-    error_log("Executando insert com os valores - rid:$residenciaId, uid:$usuarioId, nome:$nome, pot:$potencia, horas:$horas");
     $stmt->execute([
         ':rid' => $residenciaId,
         ':uid' => $usuarioId,
+        ':cid' => $comodoId,
         ':nome' => $nome,
         ':pot' => $potencia,
         ':horas' => $horas
     ]);
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
-    echo json_encode(['sucesso'=>true,'mensagem'=>'Aparelho criado','aparelho'=>['id'=>$row['id'],'nome'=>$nome,'potencia'=>$potencia,'horasUso'=>$horas,'residenciaId'=>$residenciaId]]);
+    echo json_encode(['sucesso'=>true,'mensagem'=>'Aparelho criado','aparelho'=>['id'=>$row['id'],'nome'=>$nome,'potencia'=>$potencia,'horasUso'=>$horas,'comodoId'=>$comodoId,'residenciaId'=>$residenciaId]]);
 } catch (PDOException $e) {
     http_response_code(500);
-    error_log("Erro create_aparelho: ".$e->getMessage());
+    error_log("Erro create_aparelho: " . $e->getMessage());
     echo json_encode(['sucesso'=>false,'mensagem'=>'Erro ao criar aparelho']);
 }

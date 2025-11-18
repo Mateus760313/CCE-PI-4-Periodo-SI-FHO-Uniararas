@@ -57,11 +57,21 @@
                     <img id="residenciaImagemDetalhe" class="residencia-header-image" src="" alt="">
                     <div class="residencia-header-info">
                         <h2 id="residenciaNomeDetalhe"></h2>
-                        <p style="color: var(--text-light);">Gerencie os aparelhos desta residência</p>
+                        <p style="color: var(--text-light);">Gerencie os cômodos desta residência</p>
+            
+                        <div class="residencia-stats">
+                            <div class="stat-card">
+                                <span class="stat-label">Consumo Total (Mês)</span>
+                                <span class="stat-value" id="totalKWhResidencia">-- kWh</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-label">Custo Estimado (Mês)</span>
+                            <span class="stat-value" id="totalReaisResidencia">R$ --</span>
+                        </div>
                     </div>
                 </div>
             </div>
-
+        </div>
             <div class="comodos-section">
                 <div class="section-title">
                     <h3>Cômodos Cadastrados</h3>
@@ -71,7 +81,7 @@
                 </div>
 
                 <div class="comodos-grid" id="comodosGrid">
-                    </div>
+                </div>
 
                 <div id="emptyStateComodos" class="empty-state" style="display: none;">
                     <div class="empty-icon">🏠</div>
@@ -82,57 +92,57 @@
                 </div>
             </div>
         </div>
+        <!-- VIEW DO CÔMODO -->
+        <div id="comodoView" class="residencia-view">
+            <div class="breadcrumb">
+                <a href="#" onclick="voltarDashboard()">← Residências</a>
+                <span style="margin: 0 5px;">/</span>
+                <a href="#" id="breadcrumbResidencia" onclick="voltarParaResidencia()"></a>
+            </div>
 
-        <div id="comodoView" class="residencia-view"> <div class="breadcrumb">
-            <a href="#" onclick="voltarParaDashboard()">← Residências</a>
-            <span style="margin: 0 5px;">/</span>
-            <a href="#" id="breadcrumbResidencia" onclick="voltarParaResidencia()"></a> 
-        </div>
-
-        <div class="residencia-header">
-            <div class="residencia-header-content">
-                <img id="comodoImagemDetalhe" class="residencia-header-image" src="" alt="">
-                <div class="residencia-header-info">
-                    <h2 id="residenciaNomeDetalhe"></h2>
-                    
-                    <p style="color: var(--text-light);">Gerencie os cômodos desta residência</p>
-                    
-                    <div class="residencia-stats">
-                        <div class="stat-card">
-                            <span class="stat-label">Consumo Total (Mês)</span>
-                            <span class="stat-value" id="totalKWhResidencia">-- kWh</span>
-                        </div>
-                        <div class="stat-card">
-                            <span class="stat-label">Custo Estimado (Mês)</span>
-                            <span class="stat-value" id="totalReaisResidencia">R$ --</span>
+            <div class="residencia-header">
+                <div class="residencia-header-content">
+                    <img id="comodoImagemDetalhe" class="residencia-header-image" src="" alt="">
+                    <div class="residencia-header-info">
+                        <h2 id="comodoNomeDetalhe"></h2>
+                        <p style="color: var(--text-light);">Gerencie os aparelhos deste cômodo</p>
+                        
+                        <div class="residencia-stats">
+                            <div class="stat-card">
+                                <span class="stat-label">Consumo Total (Mês)</span>
+                                <span class="stat-value" id="totalKWhComodo">-- kWh</span>
+                            </div>
+                            <div class="stat-card">
+                                <span class="stat-label">Custo Estimado (Mês)</span>
+                                <span class="stat-value" id="totalReaisComodo">R$ --</span>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="aparelhos-section">
-            <div class="section-title">
-                <h3>Aparelhos Cadastrados</h3>
-                <button class="btn-add" onclick="openModalAparelho()">
-                    <span>+</span> Adicionar Aparelho
-                </button>
-            </div>
-
-            <div class="aparelhos-grid" id="aparelhosGrid">
+            <div class="aparelhos-section">
+                <div class="section-title">
+                    <h3>Aparelhos Cadastrados</h3>
+                    <button class="btn-add" onclick="openModalAparelho()">
+                        <span>+</span> Adicionar Aparelho
+                    </button>
                 </div>
 
-            <div id="emptyStateAparelhos" class="empty-state" style="display: none;">
-                <div class="empty-icon">💡</div>
-                <div class="empty-text">Nenhum aparelho cadastrado ainda</div>
-                <button class="btn-primary" onclick="openModalAparelho()" style="max-width: 300px; margin: 0 auto;">
-                    Adicionar Primeiro Aparelho
-                </button>
+                <div class="aparelhos-grid" id="aparelhosGrid">
+                </div>
+
+                <div id="emptyStateAparelhos" class="empty-state" style="display: none;">
+                    <div class="empty-icon">💡</div>
+                    <div class="empty-text">Nenhum aparelho cadastrado ainda</div>
+                    <button class="btn-primary" onclick="openModalAparelho()" style="max-width: 300px; margin: 0 auto;">
+                        Adicionar Primeiro Aparelho
+                    </button>
+                </div>
             </div>
         </div>
     </main>
 
-    <!-- FOOTER -->
     <footer class="footer">
         <p>&copy; 2025 CCE - Controle de Consumo Energético. Todos os direitos reservados.</p>
     </footer>

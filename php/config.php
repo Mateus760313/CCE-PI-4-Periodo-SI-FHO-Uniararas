@@ -9,12 +9,12 @@
 // define('SMTP_PASS', 'SUA_SENHA_DE_APP');
 // define('SMTP_PORT', 587);
 // define('SMTP_FROM', 'seu-email@gmail.com');
-// define('SMTP_FROM_NAME', 'CCE - Controle de Consumo Energético');
+// define('SMTP_FROM_NAME', 'CCE - Controle de Consumo Energetico');
 
 // Deixe os valores vazios até você preencher localmente.
 define('SMTP_HOST', 'smtp.gmail.com');
-define('SMTP_USER', 'x'); // Aqui deixamos o email
-define('SMTP_PASS', 'x'); // Aqui deixamos a senha 
+define('SMTP_USER', 'xxx');
+define('SMTP_PASS', 'xxx');
 define('SMTP_PORT', 587);
 define('SMTP_FROM', 'ccerecuperacao@gmail.com');
-define('SMTP_FROM_NAME', 'CCE - Controle de Consumo Energético');
+define('SMTP_FROM_NAME', 'CCE - Controle de Consumo Energetico');

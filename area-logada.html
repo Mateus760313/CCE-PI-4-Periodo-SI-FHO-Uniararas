@@ -62,25 +62,72 @@
                 </div>
             </div>
 
-            <div class="aparelhos-section">
+            <div class="comodos-section">
                 <div class="section-title">
-                    <h3>Aparelhos Cadastrados</h3>
-                    <button class="btn-add" onclick="openModalAparelho()">
-                        <span>+</span> Adicionar Aparelho
+                    <h3>Cômodos Cadastrados</h3>
+                    <button class="btn-add" onclick="openModalComodo()">
+                        <span>+</span> Adicionar Cômodo
                     </button>
                 </div>
 
-                <div class="aparelhos-grid" id="aparelhosGrid">
-                    <!-- Aparelhos serão inseridos aqui -->
-                </div>
+                <div class="comodos-grid" id="comodosGrid">
+                    </div>
 
-                <div id="emptyState" class="empty-state" style="display: none;">
-                    <div class="empty-icon">💡</div>
-                    <div class="empty-text">Nenhum aparelho cadastrado ainda</div>
-                    <button class="btn-primary" onclick="openModalAparelho()" style="max-width: 300px; margin: 0 auto;">
-                        Adicionar Primeiro Aparelho
+                <div id="emptyStateComodos" class="empty-state" style="display: none;">
+                    <div class="empty-icon">🏠</div>
+                    <div class="empty-text">Nenhum cômodo cadastrado ainda</div>
+                    <button class="btn-primary" onclick="openModalComodo()" style="max-width: 300px; margin: 0 auto;">
+                        Adicionar Primeiro Cômodo
                     </button>
                 </div>
+            </div>
+        </div>
+
+        <div id="comodoView" class="residencia-view"> <div class="breadcrumb">
+            <a href="#" onclick="voltarParaDashboard()">← Residências</a>
+            <span style="margin: 0 5px;">/</span>
+            <a href="#" id="breadcrumbResidencia" onclick="voltarParaResidencia()"></a> 
+        </div>
+
+        <div class="residencia-header">
+            <div class="residencia-header-content">
+                <img id="comodoImagemDetalhe" class="residencia-header-image" src="" alt="">
+                <div class="residencia-header-info">
+                    <h2 id="residenciaNomeDetalhe"></h2>
+                    
+                    <p style="color: var(--text-light);">Gerencie os cômodos desta residência</p>
+                    
+                    <div class="residencia-stats">
+                        <div class="stat-card">
+                            <span class="stat-label">Consumo Total (Mês)</span>
+                            <span class="stat-value" id="totalKWhResidencia">-- kWh</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-label">Custo Estimado (Mês)</span>
+                            <span class="stat-value" id="totalReaisResidencia">R$ --</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="aparelhos-section">
+            <div class="section-title">
+                <h3>Aparelhos Cadastrados</h3>
+                <button class="btn-add" onclick="openModalAparelho()">
+                    <span>+</span> Adicionar Aparelho
+                </button>
+            </div>
+
+            <div class="aparelhos-grid" id="aparelhosGrid">
+                </div>
+
+            <div id="emptyStateAparelhos" class="empty-state" style="display: none;">
+                <div class="empty-icon">💡</div>
+                <div class="empty-text">Nenhum aparelho cadastrado ainda</div>
+                <button class="btn-primary" onclick="openModalAparelho()" style="max-width: 300px; margin: 0 auto;">
+                    Adicionar Primeiro Aparelho
+                </button>
             </div>
         </div>
     </main>
@@ -99,10 +146,21 @@
                 <p style="color: var(--text-light);">Cadastre uma nova residência para monitoramento</p>
             </div>
 
-            <form id="formResidencia" onsubmit="cadastrarResidencia(event)">
+            <form id="formResidencia" onsubmit="salvarResidencia(event)">
                 <div class="form-group">
                     <label for="nomeResidencia">Nome da Residência *</label>
                     <input type="text" id="nomeResidencia" placeholder="Ex: Casa Principal, Apartamento, Sítio..." required>
+                </div>
+
+                <div class="form-group">
+                    <label for="cidadeResidencia">Cidade</label>
+                    <input type="text" id="cidadeResidencia" placeholder="Ex: São Paulo, SP (Opcional)">
+                </div>
+
+                <div class="form-group">
+                    <label for="tarifaResidencia">Valor do KWh (R$) *</label>
+                    <input type="number" id="tarifaResidencia" placeholder="Ex: 0.75" required min="0.01" step="0.01">
+                    <small style="color: var(--text-light); font-size: 0.8rem; margin-top: 4px;">Consulte o valor na sua conta de energia.</small>
                 </div>
 
                 <div class="form-group">
@@ -131,7 +189,27 @@
                     </div>
                 </div>
 
-                <button type="submit" class="btn-primary">Cadastrar Residência</button>
+                <button type="submit" class="btn-primary" id="btnSalvarResidencia">Cadastrar Residência</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL CADASTRAR COMODO -->
+    <div id="modalComodo" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModalComodo()">×</button>
+            <div class="modal-header">
+                <h2>Novo Cômodo</h2>
+                <p style="color: var(--text-light);">Adicione um cômodo à sua residência</p>
+            </div>
+
+            <form id="formComodo" onsubmit="cadastrarComodo(event)">
+                <div class="form-group">
+                    <label for="nomeComodo">Nome do Cômodo *</label>
+                    <input type="text" id="nomeComodo" placeholder="Ex: Cozinha, Quarto Casal, Sala..." required>
+                </div>
+
+                <button type="submit" class="btn-primary">Adicionar Cômodo</button>
             </form>
         </div>
     </div>

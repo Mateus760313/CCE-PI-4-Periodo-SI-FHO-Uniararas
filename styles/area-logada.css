@@ -169,6 +169,7 @@ body {
     transition: all 0.3s ease;
     cursor: pointer;
     border: 2px solid transparent;
+    position: relative;
 }
 
 .residencia-card:hover {
@@ -215,6 +216,29 @@ body {
 .add-residencia-card:hover {
     background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.1));
     transform: translateY(-4px);
+}
+
+.btn-edit-residencia {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: rgba(255, 255, 255, 0.8);
+    border: 1px solid var(--border-color);
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+    line-height: 30px; /* Ajuste para centralizar o ícone */
+    text-align: center;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    transition: all 0.2s;
+    z-index: 10;
+}
+
+.btn-edit-residencia:hover {
+    background-color: #fff;
+    transform: scale(1.1);
 }
 
 .add-icon {
@@ -574,6 +598,65 @@ body {
     font-size: 1.2rem;
     color: var(--text-light);
     margin-bottom: 24px;
+}
+
+
+.comodos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 24px;
+    margin-top: 24px;
+}
+
+.comodo-card {
+    background-color: var(--background-secondary);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.comodo-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 12px rgba(0,0,0,0.08);
+}
+
+.comodo-image {
+    width: 60px; /* Tamanho reduzido para ícone */
+    height: 60px;
+    margin: 16px 0 0 16px;
+    object-fit: cover;
+}
+
+.comodo-info {
+    padding: 16px;
+    padding-bottom: 8px;
+    flex-grow: 1;
+}
+
+.comodo-nome {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.comodo-meta {
+    font-size: 0.9rem;
+    color: var(--text-light);
+}
+
+.comodo-kpi {
+    padding: 12px 16px;
+    border-top: 1px solid var(--border-color);
+    background-color: rgba(0,0,0,0.02);
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--primary-color);
 }
 
 /* ========== FOOTER ========== */

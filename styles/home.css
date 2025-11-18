@@ -163,7 +163,7 @@ body {
 
 /* ========== HERO SECTION ========== */
 .hero-section {
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.95), rgba(5, 150, 105, 0.95)), 
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.5), rgba(5, 150, 105, 0.5)), 
                 url('https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?q=80&w=2070') no-repeat center center/cover;
     color: white;
     text-align: center;

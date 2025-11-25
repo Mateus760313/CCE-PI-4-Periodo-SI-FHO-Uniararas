@@ -16,11 +16,107 @@ let comodoAtual = null;
 
 // ========== INICIALIZAÇÃO E LISTENERS ==========
 document.addEventListener('DOMContentLoaded', function() {
+    // Dark Mode Toggle
+    const themeToggle = document.getElementById('themeToggle');
+    const savedTheme = localStorage.getItem('theme');
+    
+    // Aplica tema salvo ou detecta preferência do sistema
+    if (savedTheme) {
+        document.documentElement.setAttribute('data-theme', savedTheme);
+    } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+    }
+    
+    // Listener para toggle de tema
+    if (themeToggle) {
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        });
+    }
+    
     carregarDadosUsuario(); // Carrega o nome e verifica a sessão
     setupImageSelector();
     setupModalCloseOnOutsideClick();
     setupLogoutListener(); // Configura o botão de sair
+    setupTimeSelector(); // Configura os botões de tempo
 });
+
+function setupTimeSelector() {
+    const timeBtns = document.querySelectorAll('.time-btn');
+    const customTimeBtn = document.getElementById('btnCustomTime');
+    const customTimeInputDiv = document.getElementById('customTimeInput');
+    const customTimeValue = document.getElementById('customTimeValue');
+    const customTimeUnit = document.getElementById('customTimeUnit');
+    const horasUsoInput = document.getElementById('horasUso');
+
+    // Função para atualizar o valor hidden
+    function updateHiddenValue(hours) {
+        horasUsoInput.value = hours;
+    }
+
+    // Listener para botões predefinidos
+    timeBtns.forEach(btn => {
+        if (btn.classList.contains('custom-time-btn')) return;
+
+        btn.addEventListener('click', () => {
+            // Remove active de todos
+            timeBtns.forEach(b => b.classList.remove('active'));
+            // Adiciona active ao clicado
+            btn.classList.add('active');
+            
+            // Esconde input personalizado
+            customTimeInputDiv.style.display = 'none';
+            
+            // Calcula horas e atualiza hidden
+            const minutes = parseInt(btn.dataset.minutes);
+            const hours = minutes / 60;
+            updateHiddenValue(hours);
+        });
+    });
+
+    // Listener para botão personalizado
+    if (customTimeBtn) {
+        customTimeBtn.addEventListener('click', () => {
+            timeBtns.forEach(b => b.classList.remove('active'));
+            customTimeBtn.classList.add('active');
+            customTimeInputDiv.style.display = 'flex';
+            
+            // Recalcula baseado no input atual (se houver valor)
+            if (customTimeValue.value) {
+                calculateCustomTime();
+            } else {
+                horasUsoInput.value = ''; // Limpa se não tiver valor
+            }
+        });
+    }
+
+    // Lógica do input personalizado
+    function calculateCustomTime() {
+        const val = parseFloat(customTimeValue.value);
+        const unit = customTimeUnit.value;
+        
+        if (isNaN(val) || val < 0) {
+            horasUsoInput.value = '';
+            return;
+        }
+
+        let hours = 0;
+        if (unit === 'min') {
+            hours = val / 60;
+        } else {
+            hours = val;
+        }
+        updateHiddenValue(hours);
+    }
+
+    if (customTimeValue && customTimeUnit) {
+        customTimeValue.addEventListener('input', calculateCustomTime);
+        customTimeUnit.addEventListener('change', calculateCustomTime);
+    }
+}
 
 function setupLogoutListener() {
     const logoutBtn = document.getElementById('logoutBtn') || document.querySelector('.btn-logout');
@@ -129,16 +225,57 @@ function renderizarResidencias() {
         
         // [HTML ALTERADO AQUI]
         card.innerHTML = `
-            <button class="btn-edit-residencia" onclick="openModalResidencia(${residencia.id}, event)">
-                &#9998; </button>
+            <div class="card-actions">
+                <button class="btn-edit-residencia" onclick="openModalResidencia(${residencia.id}, event)" title="Editar">
+                    &#9998;
+                </button>
+                <button class="btn-delete-residencia" onclick="deletarResidencia(${residencia.id}, event)" title="Excluir">
+                    &times;
+                </button>
+            </div>
             
             <img class="residencia-image" src="${imagemUrl}" alt="${residencia.nome}">
             <div class="residencia-info">
                 <div class="residencia-nome">${residencia.nome}</div>
-                <div class="residencia-meta">${contarAparelhos(residencia.id)} aparelhos cadastrados</div>
+                <div class="residencia-meta">
+                    <div>${residencia.total_aparelhos || 0} aparelhos</div>
+                    <div style="font-size: 0.9em; color: var(--primary-color); font-weight: 600;">
+                        R$ ${(parseFloat(residencia.total_custo_mensal) || 0).toFixed(2).replace('.', ',')} / mês
+                    </div>
+                </div>
             </div>
         `;
         grid.insertBefore(card, addCard);
+    });
+}
+
+function deletarResidencia(id, event) {
+    if (event) event.stopPropagation();
+    
+    if (!confirm('Tem certeza que deseja excluir esta residência? Todos os cômodos e aparelhos vinculados serão excluídos permanentemente.')) {
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('id', id);
+
+    fetch('php/delete_residencia.php', {
+        method: 'POST',
+        body: formData,
+        credentials: 'include'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.sucesso) {
+            alert('Residência excluída com sucesso!');
+            carregarResidencias(); // Recarrega a lista
+        } else {
+            alert(data.mensagem || 'Erro ao excluir residência');
+        }
+    })
+    .catch(error => {
+        console.error('Erro ao excluir residência:', error);
+        alert('Erro ao excluir residência');
     });
 }
 
@@ -174,6 +311,9 @@ function openModalResidencia(id = null, event = null) {
     document.querySelectorAll('.image-option').forEach(opt => opt.classList.remove('selected'));
     delete form.dataset.editId; // Remove qualquer ID de edição anterior
 
+    // Configura os listeners de tarifa
+    setupTarifaCalculator();
+
     if (id) {
         // MODO EDIÇÃO
         const residencia = residencias.find(r => r.id === id);
@@ -190,6 +330,7 @@ function openModalResidencia(id = null, event = null) {
         // Preenche o formulário
         document.getElementById('nomeResidencia').value = residencia.nome;
         document.getElementById('cidadeResidencia').value = residencia.cidade || '';
+        // Tenta inferir a bandeira ou deixa padrão
         document.getElementById('tarifaResidencia').value = residencia.tarifa_kwh || '';
 
         // Seleciona a imagem
@@ -204,9 +345,55 @@ function openModalResidencia(id = null, event = null) {
         modalTitle.textContent = 'Nova Residência';
         modalDesc.textContent = 'Cadastre uma nova residência para monitoramento';
         submitButton.textContent = 'Cadastrar Residência';
+        
+        // Dispara o cálculo inicial para preencher a tarifa padrão
+        document.getElementById('cidadeResidencia').dispatchEvent(new Event('change'));
     }
 
     modal.classList.add('active');
+}
+
+function setupTarifaCalculator() {
+    const cidadeSelect = document.getElementById('cidadeResidencia');
+    const tarifaInput = document.getElementById('tarifaResidencia');
+
+    // Configuração Global da Bandeira (Alterar aqui quando mudar a bandeira)
+    const BANDEIRA_ATUAL = 'vermelha1'; 
+
+    const tarifasBase = {
+        'Araras': 0.70,
+        'Rio Claro': 0.70,
+        'Leme': 0.70,
+        'Mogi-Guaçu': 0.70,
+        'Conchal': 0.70,
+        'Engenheiro Coelho': 0.70,
+        'Limeira': 0.70,
+        'Cordeirópolis': 0.70,
+        'Santa Gertrudes': 0.70
+    };
+
+    const adicionaisBandeira = {
+        'verde': 0,
+        'amarela': 0.01885,
+        'vermelha1': 0.04463,
+        'vermelha2': 0.07877
+    };
+
+    function calcularTarifa() {
+        const cidade = cidadeSelect.value;
+        
+        if (cidade && tarifasBase[cidade] !== undefined) {
+            const base = tarifasBase[cidade];
+            const adicional = adicionaisBandeira[BANDEIRA_ATUAL] || 0;
+            const total = base + adicional;
+            
+            // Arredonda para 4 casas decimais para precisão
+            tarifaInput.value = total.toFixed(4);
+        }
+    }
+
+    cidadeSelect.onchange = calcularTarifa;
+    // Removemos o listener da bandeira pois agora é fixa
 }
 
 function closeModalResidencia() {
@@ -429,7 +616,6 @@ function renderizarComodos() {
             const comodoId = Number(comodo.id);
             console.log('📦 Renderizando cômodo:', comodo.nome, 'ID:', comodoId);
             
-            // ✅ ESTAS SÃO AS LINHAS QUE ESTAVAM FALTANDO:
             const custoComodo = parseFloat(comodo.custo_total_reais || 0);
             const consumoComodo = parseFloat(comodo.consumo_total_kwh || 0);
             const aparelhoCount = parseInt(comodo.aparelho_count || 0);
@@ -456,11 +642,26 @@ function renderizarComodos() {
             
             const imagemUrl = 'https://img.icons8.com/fluency/96/room.png';
             
+            // Verifica se há um vilão
+            let vilaoHtml = '';
+            if (comodo.vilao_nome && parseFloat(comodo.vilao_custo) > 0) {
+                vilaoHtml = `
+                    <div class="comodo-vilao" title="Aparelho com maior consumo">
+                        <span class="vilao-icon">⚠️</span>
+                        <span class="vilao-info">
+                            <strong>${comodo.vilao_nome}</strong>
+                            <small>R$ ${parseFloat(comodo.vilao_custo).toFixed(2).replace('.', ',')}</small>
+                        </span>
+                    </div>
+                `;
+            }
+
             card.innerHTML = `
                 <img class="comodo-image" src="${imagemUrl}" alt="${comodo.nome}">
                 <div class="comodo-info">
                     <div class="comodo-nome">${comodo.nome}</div>
                     <div class="comodo-meta">${aparelhoCount} aparelhos</div>
+                    ${vilaoHtml}
                 </div>
                 <div class="comodo-kpi">
                     <span>${custoComodo.toFixed(2).replace('.', ',')} R$/mês</span>
@@ -486,75 +687,6 @@ function renderizarComodos() {
                 deletarComodo(comodoId);
             });
             grid.appendChild(card);
-        // ========== MODAL EDITAR COMODO ==========
-        function openModalEditarComodo(id, nomeAtual) {
-            const modal = document.getElementById('modalComodo');
-            const form = document.getElementById('formComodo');
-            modal.classList.add('active');
-            form.reset();
-            document.getElementById('nomeComodo').value = nomeAtual;
-            form.dataset.editId = id;
-            // Troca o submit handler para edição
-            form.onsubmit = function(event) {
-                event.preventDefault();
-                const novoNome = document.getElementById('nomeComodo').value;
-                if (!novoNome) {
-                    alert('Digite o novo nome do cômodo');
-                    return;
-                }
-                const formData = new FormData();
-                formData.append('id', id);
-                formData.append('nome', novoNome);
-                fetch('php/update_comodo.php', {
-                    method: 'POST',
-                    body: formData,
-                    credentials: 'include'
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.sucesso) {
-                        carregarComodos(residenciaAtual.id);
-                        closeModalComodo();
-                        alert('Cômodo atualizado com sucesso!');
-                    } else {
-                        alert(data.mensagem || 'Erro ao atualizar cômodo');
-                    }
-                })
-                .catch(error => {
-                    console.error('Erro ao atualizar cômodo:', error);
-                    alert('Erro ao atualizar cômodo');
-                });
-                // Restaura o submit padrão ao fechar
-                setTimeout(() => { form.onsubmit = cadastrarComodo; }, 500);
-            };
-        }
-
-        function deletarComodo(id) {
-            if (!confirm('Deseja realmente excluir este cômodo? Todos os aparelhos vinculados ficarão sem cômodo.')) return;
-            const formData = new FormData();
-            formData.append('id', id);
-            fetch('php/delete_comodo.php', {
-                method: 'POST',
-                body: formData,
-                credentials: 'include'
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.sucesso) {
-                    carregarComodos(residenciaAtual.id);
-                    alert('Cômodo excluído com sucesso!');
-                } else {
-                    alert(data.mensagem || 'Erro ao excluir cômodo');
-                }
-            })
-            .catch(error => {
-                console.error('Erro ao excluir cômodo:', error);
-                alert('Erro ao excluir cômodo');
-            });
-        }
-            // Restaura o submit padrão (cadastrar)
-            const form = document.getElementById('formComodo');
-            form.onsubmit = cadastrarComodo;
         });
         
         console.log('🎨 Total de cards adicionados:', grid.children.length);
@@ -566,6 +698,73 @@ function renderizarComodos() {
     document.getElementById('totalReaisResidencia').textContent = `R$ ${totalReaisResidencia.toFixed(2).replace('.', ',')}`;
     
     console.log('🎨 === RENDERIZAÇÃO CONCLUÍDA ===');
+}
+
+// ========== FUNÇÕES AUXILIARES DE CÔMODO ==========
+function openModalEditarComodo(id, nomeAtual) {
+    const modal = document.getElementById('modalComodo');
+    const form = document.getElementById('formComodo');
+    modal.classList.add('active');
+    form.reset();
+    document.getElementById('nomeComodo').value = nomeAtual;
+    form.dataset.editId = id;
+    // Troca o submit handler para edição
+    form.onsubmit = function(event) {
+        event.preventDefault();
+        const novoNome = document.getElementById('nomeComodo').value;
+        if (!novoNome) {
+            alert('Digite o novo nome do cômodo');
+            return;
+        }
+        const formData = new FormData();
+        formData.append('id', id);
+        formData.append('nome', novoNome);
+        fetch('php/update_comodo.php', {
+            method: 'POST',
+            body: formData,
+            credentials: 'include'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.sucesso) {
+                carregarComodos(residenciaAtual.id);
+                closeModalComodo();
+                alert('Cômodo atualizado com sucesso!');
+            } else {
+                alert(data.mensagem || 'Erro ao atualizar cômodo');
+            }
+        })
+        .catch(error => {
+            console.error('Erro ao atualizar cômodo:', error);
+            alert('Erro ao atualizar cômodo');
+        });
+        // Restaura o submit padrão ao fechar
+        setTimeout(() => { form.onsubmit = cadastrarComodo; }, 500);
+    };
+}
+
+function deletarComodo(id) {
+    if (!confirm('Deseja realmente excluir este cômodo? Todos os aparelhos vinculados ficarão sem cômodo.')) return;
+    const formData = new FormData();
+    formData.append('id', id);
+    fetch('php/delete_comodo.php', {
+        method: 'POST',
+        body: formData,
+        credentials: 'include'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.sucesso) {
+            carregarComodos(residenciaAtual.id);
+            alert('Cômodo excluído com sucesso!');
+        } else {
+            alert(data.mensagem || 'Erro ao excluir cômodo');
+        }
+    })
+    .catch(error => {
+        console.error('Erro ao excluir cômodo:', error);
+        alert('Erro ao excluir cômodo');
+    });
 }
 
 function renderizarAparelhos() {
@@ -584,7 +783,6 @@ function renderizarAparelhos() {
     // Alerta de tarifa (movido para cá)
     if (tarifa === 0) {
         document.getElementById('totalReaisComodo').textContent = 'R$ --';
-        // ... (você pode adicionar o alerta de tarifa aqui se quiser)
     }
 
     if (!aparelhos || aparelhos.length === 0) {
@@ -596,10 +794,22 @@ function renderizarAparelhos() {
 
     emptyState.style.display = 'none';
 
+    // Encontra o maior custo para destacar
+    let maiorCusto = 0;
+    let idMaiorCusto = -1;
+    
+    aparelhos.forEach(a => {
+        const custo = (a.potencia_watts * a.horas_uso / 1000) * 30 * tarifa;
+        if (custo > maiorCusto) {
+            maiorCusto = custo;
+            idMaiorCusto = a.id;
+        }
+    });
+
     aparelhos.forEach(aparelho => {
-        const consumoDiario = (aparelho.potencia_watts * aparelho.horas_uso) / 1000;
-        const consumoMensal = consumoDiario * 30;
-        const custoMensal = consumoMensal * tarifa;
+        // Usar dados do backend
+        const consumoMensal = parseFloat(aparelho.consumo_mensal_kwh || 0);
+        const custoMensal = parseFloat(aparelho.custo_mensal_reais || 0);
 
         // Soma para os KPIs do Cômodo
         totalKWhComodo += consumoMensal;
@@ -607,8 +817,14 @@ function renderizarAparelhos() {
         
         const card = document.createElement('div');
         card.className = 'aparelho-card';
-        // O HTML do card continua o mesmo de antes...
-        card.innerHTML = `
+        
+        // Aplica destaque se for o vilão
+        if (aparelho.id === idMaiorCusto && maiorCusto > 0) {
+            card.classList.add('destaque-vilao');
+            card.innerHTML += `<div class="badge-vilao">Maior Gasto</div>`;
+        }
+        
+        card.innerHTML += `
             <div class="aparelho-icon">⚡</div>
             <div class="aparelho-nome">${aparelho.nome}</div>
             <div class="aparelho-info">
@@ -638,64 +854,6 @@ function renderizarAparelhos() {
             deletarAparelho(aparelho.id);
         });
         grid.appendChild(card);
-    // ========== MODAL EDITAR APARELHO ==========
-    function abrirModalEditarAparelho(aparelho) {
-        // Abre o modal e preenche os campos
-        document.getElementById('modalAparelho').classList.add('active');
-        document.getElementById('nomeAparelho').value = aparelho.nome;
-        document.getElementById('potenciaAparelho').value = aparelho.potencia_watts;
-        document.getElementById('horasUso').value = aparelho.horas_uso;
-
-        // Troca o submit do form para editar
-        const form = document.getElementById('formAparelho');
-        form.onsubmit = function(event) {
-            event.preventDefault();
-            salvarEdicaoAparelho(aparelho.id);
-        };
-    }
-
-    function salvarEdicaoAparelho(id) {
-        const nome = document.getElementById('nomeAparelho').value;
-        const potencia = parseInt(document.getElementById('potenciaAparelho').value);
-        const horasUso = parseFloat(document.getElementById('horasUso').value);
-
-        if (!comodoAtual || !comodoAtual.id) {
-            alert('Erro: selecione um cômodo antes de editar o aparelho');
-            return;
-        }
-
-        const formData = new FormData();
-        formData.append('id', id);
-        formData.append('nome', nome);
-        formData.append('potencia', potencia);
-        formData.append('horas', horasUso);
-        formData.append('comodo_id', comodoAtual.id);
-
-        fetch('php/update_aparelho.php', {
-            method: 'POST',
-            body: formData,
-            credentials: 'include'
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.sucesso) {
-                carregarAparelhos(comodoAtual.id);
-                closeModalAparelho();
-                alert('Aparelho editado com sucesso!');
-            } else {
-                alert(data.mensagem || 'Erro ao editar aparelho');
-            }
-        })
-        .catch(error => {
-            console.error('Erro ao editar aparelho:', error);
-            alert('Erro ao editar aparelho');
-        });
-
-        // Restaura o submit padrão ao fechar
-        setTimeout(() => {
-            document.getElementById('formAparelho').onsubmit = cadastrarAparelho;
-        }, 500);
-    }
     });
 
     // [ALTERADO] Atualiza os KPIs do Cômodo (no cabeçalho da comodoView)
@@ -703,6 +861,96 @@ function renderizarAparelhos() {
     if (tarifa > 0) {
         document.getElementById('totalReaisComodo').textContent = `R$ ${totalReaisComodo.toFixed(2).replace('.', ',')}`;
     }
+}
+
+// ========== FUNÇÕES AUXILIARES DE APARELHO ==========
+function abrirModalEditarAparelho(aparelho) {
+    // Abre o modal e preenche os campos
+    document.getElementById('modalAparelho').classList.add('active');
+    document.getElementById('nomeAparelho').value = aparelho.nome;
+    document.getElementById('potenciaAparelho').value = aparelho.potencia_watts;
+    
+    const horasUso = parseFloat(aparelho.horas_uso);
+    document.getElementById('horasUso').value = horasUso;
+
+    // Lógica para selecionar o botão de tempo correto
+    const minutes = Math.round(horasUso * 60);
+    const timeBtns = document.querySelectorAll('.time-btn');
+    const customTimeBtn = document.getElementById('btnCustomTime');
+    const customTimeInputDiv = document.getElementById('customTimeInput');
+    const customTimeValue = document.getElementById('customTimeValue');
+    const customTimeUnit = document.getElementById('customTimeUnit');
+
+    // Reseta estado visual
+    timeBtns.forEach(b => b.classList.remove('active'));
+    customTimeInputDiv.style.display = 'none';
+
+    // Tenta encontrar botão correspondente (com margem de erro pequena para float)
+    let found = false;
+    timeBtns.forEach(btn => {
+        if (btn.dataset.minutes && Math.abs(parseInt(btn.dataset.minutes) - minutes) < 1) {
+            btn.classList.add('active');
+            found = true;
+        }
+    });
+
+    // Se não achou botão exato, usa o personalizado
+    if (!found) {
+        customTimeBtn.classList.add('active');
+        customTimeInputDiv.style.display = 'flex';
+        customTimeValue.value = horasUso;
+        customTimeUnit.value = 'hours'; // Padrão mostrar em horas na edição
+    }
+
+    // Troca o submit do form para editar
+    const form = document.getElementById('formAparelho');
+    form.onsubmit = function(event) {
+        event.preventDefault();
+        salvarEdicaoAparelho(aparelho.id);
+    };
+}
+
+function salvarEdicaoAparelho(id) {
+    const nome = document.getElementById('nomeAparelho').value;
+    const potencia = parseInt(document.getElementById('potenciaAparelho').value);
+    const horasUso = parseFloat(document.getElementById('horasUso').value);
+
+    if (!comodoAtual || !comodoAtual.id) {
+        alert('Erro: selecione um cômodo antes de editar o aparelho');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('id', id);
+    formData.append('nome', nome);
+    formData.append('potencia', potencia);
+    formData.append('horas', horasUso);
+    formData.append('comodo_id', comodoAtual.id);
+
+    fetch('php/update_aparelho.php', {
+        method: 'POST',
+        body: formData,
+        credentials: 'include'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.sucesso) {
+            carregarAparelhos(comodoAtual.id);
+            closeModalAparelho();
+            alert('Aparelho editado com sucesso!');
+        } else {
+            alert(data.mensagem || 'Erro ao editar aparelho');
+        }
+    })
+    .catch(error => {
+        console.error('Erro ao editar aparelho:', error);
+        alert('Erro ao editar aparelho');
+    });
+
+    // Restaura o submit padrão ao fechar
+    setTimeout(() => {
+        document.getElementById('formAparelho').onsubmit = cadastrarAparelho;
+    }, 500);
 }
 
 // ========== MODAL COMODO ==========
@@ -713,6 +961,8 @@ function openModalComodo() {
     }
     document.getElementById('modalComodo').classList.add('active');
     document.getElementById('formComodo').reset();
+    // [CORREÇÃO] Restaura o onsubmit para cadastrar
+    document.getElementById('formComodo').onsubmit = cadastrarComodo;
 }
 
 function closeModalComodo() {
@@ -764,6 +1014,13 @@ function openModalAparelho() {
     }
     document.getElementById('modalAparelho').classList.add('active');
     document.getElementById('formAparelho').reset();
+    
+    // Reseta visual dos botões de tempo
+    document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('customTimeInput').style.display = 'none';
+
+    // [CORREÇÃO] Restaura o onsubmit para cadastrar, caso tenha sido alterado por edição
+    document.getElementById('formAparelho').onsubmit = cadastrarAparelho;
 }
 
 function closeModalAparelho() {

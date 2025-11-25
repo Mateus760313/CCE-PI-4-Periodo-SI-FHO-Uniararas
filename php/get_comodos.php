@@ -26,15 +26,34 @@ try {
         exit;
     }
 
-    // Retorna lista de cômodos com contagem de aparelhos e placeholders para KPIs
-    $sql = "SELECT c.id::integer AS id, c.nome, c.residencia_id::integer AS residencia_id, c.imagem,
-                   COUNT(a.id) AS aparelho_count,
-                   0::double precision AS consumo_total_kwh,
-                   0::double precision AS custo_total_reais
+    // Retorna lista de cômodos com contagem de aparelhos e KPIs calculados
+    $sql = "SELECT 
+                c.id, 
+                c.nome, 
+                c.residencia_id, 
+                c.imagem,
+                COUNT(a.id) AS aparelho_count,
+                COALESCE(SUM((a.potencia_watts * a.horas_uso / 1000) * 30), 0) AS consumo_total_kwh,
+                COALESCE(SUM((a.potencia_watts * a.horas_uso / 1000) * 30 * COALESCE(r.tarifa_kwh, 0)), 0) AS custo_total_reais,
+                (
+                    SELECT a2.nome 
+                    FROM aparelhos a2 
+                    WHERE a2.comodo_id = c.id 
+                    ORDER BY (a2.potencia_watts * a2.horas_uso) DESC 
+                    LIMIT 1
+                ) as vilao_nome,
+                (
+                    SELECT ((a2.potencia_watts * a2.horas_uso / 1000) * 30 * COALESCE(r.tarifa_kwh, 0))
+                    FROM aparelhos a2 
+                    WHERE a2.comodo_id = c.id 
+                    ORDER BY (a2.potencia_watts * a2.horas_uso) DESC 
+                    LIMIT 1
+                ) as vilao_custo
             FROM comodos c
+            JOIN residencias r ON r.id = c.residencia_id
             LEFT JOIN aparelhos a ON a.comodo_id = c.id
             WHERE c.residencia_id = :rid
-            GROUP BY c.id, c.nome, c.residencia_id, c.imagem
+            GROUP BY c.id, c.nome, c.residencia_id, c.imagem, r.tarifa_kwh
             ORDER BY c.nome ASC";
 
     $stmt = $pdo->prepare($sql);

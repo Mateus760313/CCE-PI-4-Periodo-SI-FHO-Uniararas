@@ -11,7 +11,21 @@ if (!$usuarioId) {
 }
 
 try {
-    $sql = "SELECT id, nome, imagem, data_criacao FROM residencias WHERE usuario_id = :usuario_id ORDER BY data_criacao DESC";
+    $sql = "SELECT 
+                r.id, 
+                r.nome, 
+                r.imagem, 
+                r.data_criacao, 
+                r.tarifa_kwh,
+                COUNT(a.id) as total_aparelhos,
+                COALESCE(SUM((a.potencia_watts * a.horas_uso / 1000) * 30), 0) as total_kwh_mensal,
+                COALESCE(SUM((a.potencia_watts * a.horas_uso / 1000) * 30 * COALESCE(r.tarifa_kwh, 0)), 0) as total_custo_mensal
+            FROM residencias r
+            LEFT JOIN aparelhos a ON a.residencia_id = r.id
+            WHERE r.usuario_id = :usuario_id
+            GROUP BY r.id
+            ORDER BY r.data_criacao DESC";
+            
     $stmt = $pdo->prepare($sql);
     $stmt->execute([':usuario_id' => $usuarioId]);
     $residencias = $stmt->fetchAll(PDO::FETCH_ASSOC);

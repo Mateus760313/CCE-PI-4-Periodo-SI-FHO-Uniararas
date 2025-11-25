@@ -1,4 +1,25 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // ========== DARK MODE TOGGLE ==========
+    const themeToggle = document.getElementById('themeToggle');
+    const savedTheme = localStorage.getItem('theme');
+    
+    // Aplica o tema salvo ou detecta preferência do sistema
+    if (savedTheme) {
+        document.documentElement.setAttribute('data-theme', savedTheme);
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+    }
+    
+    if (themeToggle) {
+        themeToggle.addEventListener('click', function() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        });
+    }
+
     // VARIÁVEIS DE ELEMENTOS
     const loginSection = document.getElementById('login');
     const cadastroSection = document.getElementById('cadastro');

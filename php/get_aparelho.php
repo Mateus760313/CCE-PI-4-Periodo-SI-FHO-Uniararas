@@ -26,7 +26,18 @@ try {
             exit;
         }
 
-        $sql = 'SELECT id, nome, potencia_watts, horas_uso, data_criacao FROM aparelhos WHERE comodo_id = :cid ORDER BY data_criacao DESC';
+        $sql = 'SELECT 
+                    a.id, 
+                    a.nome, 
+                    a.potencia_watts, 
+                    a.horas_uso, 
+                    a.data_criacao,
+                    ((a.potencia_watts * a.horas_uso / 1000) * 30) as consumo_mensal_kwh,
+                    ((a.potencia_watts * a.horas_uso / 1000) * 30 * COALESCE(r.tarifa_kwh, 0)) as custo_mensal_reais
+                FROM aparelhos a
+                JOIN residencias r ON r.id = a.residencia_id
+                WHERE a.comodo_id = :cid 
+                ORDER BY custo_mensal_reais DESC, a.nome ASC';
         $stmt = $pdo->prepare($sql);
         $stmt->execute([':cid' => $comodoId]);
         $aparelhos = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -48,7 +59,18 @@ try {
         exit;
     }
 
-    $sql = "SELECT id, nome, potencia_watts, horas_uso, data_criacao FROM aparelhos WHERE residencia_id = :rid ORDER BY data_criacao DESC";
+    $sql = "SELECT 
+                a.id, 
+                a.nome, 
+                a.potencia_watts, 
+                a.horas_uso, 
+                a.data_criacao,
+                ((a.potencia_watts * a.horas_uso / 1000) * 30) as consumo_mensal_kwh,
+                ((a.potencia_watts * a.horas_uso / 1000) * 30 * COALESCE(r.tarifa_kwh, 0)) as custo_mensal_reais
+            FROM aparelhos a
+            JOIN residencias r ON r.id = a.residencia_id
+            WHERE a.residencia_id = :rid 
+            ORDER BY custo_mensal_reais DESC, a.nome ASC";
     $stmt = $pdo->prepare($sql);
     $stmt->execute([':rid' => $residenciaId]);
     $aparelhos = $stmt->fetchAll(PDO::FETCH_ASSOC);

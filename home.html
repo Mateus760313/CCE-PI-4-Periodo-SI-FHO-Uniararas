@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8" />
     <link rel="stylesheet" href="styles/home.css"> 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>CCE - Controle de Consumo Energético</title>
     <link rel="icon" type="image/png" href="src/images/icon.png">
@@ -11,18 +14,24 @@
 
     <header class="navbar">
         <div class="container">
-            <div class="logo" aria-label="Logo CCE, Controle de Consumo Energético" role="img">
+            <a href="#hero" class="logo" aria-label="Logo CCE, Controle de Consumo Energético">
                 <svg class="logo-icon" viewBox="0 0 64 64" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" >
                     <circle cx="32" cy="32" r="30" stroke="currentColor" stroke-width="4" fill="none"/>
                     <path fill="currentColor" d="M26 14l-9 18h11l-5 18 18-27H31l5-9z"/>
                 </svg>
                 CCE
-            </div>
+            </a>
             <nav id="nav-menu">
                 <ul>
                     <li><a href="#hero">Início</a></li>
                     <li><a href="#saiba-mais">Saiba Mais</a></li>
                     <li><a href="#sobre">Sobre Nós</a></li>
+                    <li>
+                        <button class="theme-toggle" id="themeToggle" aria-label="Alternar tema">
+                            <span class="icon-sun">☀️</span>
+                            <span class="icon-moon">🌙</span>
+                        </button>
+                    </li>
                     <li><a href="#login" class="btn-login">Login</a></li>
                     <li><a href="#cadastro" class="btn-cadastro">Cadastro</a></li>
                 </ul>
@@ -38,10 +47,12 @@
     <main>
         <section id="hero" class="hero-section">
             <div class="container">
-                <h1>Controle de Consumo Energético</h1>
-                <p class="subtitle">A ferramenta definitiva para entender e otimizar seus gastos com energia elétrica. Comece a economizar agora!</p>
+                <h1>Controle de Consumo<br>Energético</h1>
+                <p class="subtitle">A ferramenta definitiva para entender e otimizar seus gastos com energia elétrica. Economize dinheiro e reduza seu impacto ambiental.</p>
                 <div class="hero-buttons">
-                    <a href="#cadastro" class="btn-principal">Crie sua conta</a>
+                    <a href="#cadastro" class="btn-principal">
+                        <span>🚀</span> Comece Grátis
+                    </a>
                     <a href="#saiba-mais" class="btn-secundario">Saiba mais</a>
                 </div>
             </div>
@@ -115,7 +126,7 @@
             <div class="container">
                 <h2>Sobre Nós</h2>
                 <p>
-                    A CCE nasceu da necessidade de dar às pessoas o poder de controlar suas despesas com energia de forma simples e intuitiva.
+                    A CCE nasceu da necessidade de dar às pessoas o poder de controlar suas despesas com energia de forma simples e intuitiva. Nossa missão é transformar dados complexos em informações claras, ajudando você a tomar decisões inteligentes para economizar dinheiro e contribuir com o meio ambiente.
                 </p>
             </div>
         </section>
@@ -183,7 +194,8 @@
 
     <footer class="footer">
         <div class="container">
-            <p>&copy; 2025 CCE - Controle de Consumo Energético. Todos os direitos reservados.</p>
+            <p>© 2025 CCE - Controle de Consumo Energético. Todos os direitos reservados.</p>
+            <p style="margin-top: 8px; font-size: 0.9rem; opacity: 0.7;">Feito com 💚 para um futuro mais sustentável</p>
         </div>
     </footer>
 

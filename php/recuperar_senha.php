@@ -63,6 +63,10 @@ try {
     $mail->setFrom(SMTP_FROM, SMTP_FROM_NAME);
     $mail->addAddress($email);
 
+    // Configuração de charset UTF-8 para acentos
+    $mail->CharSet = 'UTF-8';
+    $mail->Encoding = 'base64';
+
     $mail->isHTML(true);
     $mail->Subject = 'Recuperação de Senha - CCE';
     
@@ -70,12 +74,12 @@ try {
     $resetLink = "http://localhost/PI%20para%20testes/redefinir_senha.html?token=" . $token;
     
     $mail->Body = "
-        <h1>Recuperacao de Senha</h1>
-        <p>Voce solicitou a recuperacao de senha da sua conta no CCE.</p>
+        <h1>Recuperação de Senha</h1>
+        <p>Você solicitou a recuperação de senha da sua conta no CCE.</p>
         <p>Clique no link abaixo para criar uma nova senha:</p>
         <p><a href='{$resetLink}'>{$resetLink}</a></p>
         <p>Este link expira em 1 hora.</p>
-        <p>Se voce nao solicitou esta recuperação, ignore este email.</p>
+        <p>Se você não solicitou esta recuperação, ignore este email.</p>
     ";
 
     $mail->send();

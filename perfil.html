@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CCE - Meu Perfil</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/area-logada.css">
+    <link rel="stylesheet" href="styles/perfil.css">
+    <link rel="icon" type="image/png" href="src/images/icon.png">
+</head>
+<body>
+    <!-- HEADER -->
+    <header class="header">
+        <div class="container">
+            <a href="area-logada.html" class="logo">
+                <svg class="logo-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="32" cy="32" r="30" stroke="currentColor" stroke-width="4" fill="none"/>
+                    <path fill="currentColor" d="M26 14l-9 18h11l-5 18 18-27H31l5-9z"/>
+                </svg>
+                CCE
+            </a>
+            <div class="user-area">
+                <button class="theme-toggle" id="themeToggle">
+                    <span class="icon-sun">☀️</span>
+                    <span class="icon-moon">🌙</span>
+                </button>
+                
+                <div class="user-profile-container">
+                    <button class="user-trigger" id="userTrigger" aria-label="Menu do usuário">
+                        <div class="user-avatar" id="userAvatar">U</div>
+                        <img class="user-avatar-img" id="userAvatarImg" src="" alt="" style="display: none;">
+                    </button>
+
+                    <div class="user-dropdown" id="userDropdown">
+                        <div class="dropdown-header">
+                            <div class="dropdown-avatar-large" id="dropdownAvatar">U</div>
+                            <img class="dropdown-avatar-img" id="dropdownAvatarImg" src="" alt="" style="display: none;">
+                            <div class="dropdown-name" id="dropdownName">Carregando...</div>
+                            <div class="dropdown-email" id="dropdownEmail">carregando@email.com</div>
+                            <a href="perfil.html" class="btn-manage-account">Gerenciar conta</a>
+                        </div>
+                        
+                        <div class="dropdown-divider"></div>
+
+                        <div class="dropdown-menu-links">
+                            <a href="relatorios.html" class="dropdown-menu-item">
+                                <span class="menu-icon">📊</span>
+                                <span class="menu-text">Relatórios</span>
+                            </a>
+                        </div>
+                        
+                        <div class="dropdown-divider"></div>
+                        
+                        <div class="dropdown-footer">
+                            <button class="btn-logout-dropdown" onclick="logout()">
+                                <span class="logout-icon">🚪</span> Sair
+                            </button>
+                        </div>
+
+                        <div class="dropdown-links">
+                            <a href="#">Política de Privacidade</a> • <a href="#">Termos de Serviço</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+        <div class="perfil-container">
+            <!-- Breadcrumb -->
+            <div class="breadcrumb">
+                <a href="area-logada.html">← Voltar para Dashboard</a>
+            </div>
+
+            <!-- Cabeçalho do Perfil -->
+            <div class="perfil-header">
+                <div class="perfil-avatar-section">
+                    <div class="perfil-avatar-wrapper">
+                        <div class="perfil-avatar-large" id="perfilAvatar">U</div>
+                        <img class="perfil-avatar-img" id="perfilAvatarImg" src="" alt="Foto de perfil" style="display: none;">
+                        <label class="btn-change-photo" for="inputFotoPerfil" title="Alterar foto">
+                            <span>📷</span>
+                        </label>
+                        <input type="file" id="inputFotoPerfil" accept="image/*" style="display: none;">
+                        <button class="btn-remove-photo" id="btnRemoverFoto" title="Remover foto" style="display: none;">
+                            <span>✕</span>
+                        </button>
+                    </div>
+                    <div class="perfil-info">
+                        <h1 id="perfilNome">Carregando...</h1>
+                        <p id="perfilEmail">carregando@email.com</p>
+                        <span class="perfil-badge">
+                            <span class="badge-icon">⚡</span>
+                            Usuário Ativo
+                        </span>
+                    </div>
+                </div>
+                <div class="perfil-stats-mini">
+                    <div class="stat-mini">
+                        <span class="stat-mini-value" id="statResidencias">0</span>
+                        <span class="stat-mini-label">Residências</span>
+                    </div>
+                    <div class="stat-mini">
+                        <span class="stat-mini-value" id="statAparelhos">0</span>
+                        <span class="stat-mini-label">Aparelhos</span>
+                    </div>
+                    <div class="stat-mini">
+                        <span class="stat-mini-value" id="statMembro">--</span>
+                        <span class="stat-mini-label">Membro desde</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navegação por Abas -->
+            <div class="perfil-tabs">
+                <button class="perfil-tab active" data-tab="dados">
+                    <span class="tab-icon">👤</span>
+                    Dados Pessoais
+                </button>
+                <button class="perfil-tab" data-tab="seguranca">
+                    <span class="tab-icon">🔒</span>
+                    Segurança
+                </button>
+                <button class="perfil-tab" data-tab="preferencias">
+                    <span class="tab-icon">⚙️</span>
+                    Preferências
+                </button>
+            </div>
+
+            <!-- Conteúdo das Abas -->
+            <div class="perfil-content">
+                <!-- Aba: Dados Pessoais -->
+                <div class="tab-content active" id="tab-dados">
+                    <div class="perfil-card">
+                        <div class="card-header">
+                            <h3>Informações da Conta</h3>
+                            <button class="btn-edit" id="btnEditarDados">
+                                <span>✏️</span> Editar
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <form id="formDadosPessoais">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="inputNome">Nome completo</label>
+                                        <input type="text" id="inputNome" placeholder="Seu nome completo" disabled>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="inputEmail">E-mail</label>
+                                        <input type="email" id="inputEmail" placeholder="seu@email.com" disabled>
+                                        <small class="input-hint">O e-mail é usado para login e recuperação de senha</small>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="inputTelefone">Telefone (opcional)</label>
+                                        <input type="tel" id="inputTelefone" placeholder="(00) 00000-0000" disabled>
+                                    </div>
+                                </div>
+                                <div class="form-actions" id="actionsEditarDados" style="display: none;">
+                                    <button type="button" class="btn-secondary" onclick="cancelarEdicaoDados()">Cancelar</button>
+                                    <button type="submit" class="btn-primary">Salvar Alterações</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Aba: Segurança -->
+                <div class="tab-content" id="tab-seguranca">
+                    <div class="perfil-card">
+                        <div class="card-header">
+                            <h3>Alterar Senha</h3>
+                        </div>
+                        <div class="card-body">
+                            <form id="formAlterarSenha" onsubmit="alterarSenha(event)">
+                                <div class="form-group">
+                                    <label for="senhaAtual">Senha atual</label>
+                                    <div class="input-password-wrapper">
+                                        <input type="password" id="senhaAtual" placeholder="Digite sua senha atual" required>
+                                        <button type="button" class="btn-toggle-password" onclick="togglePassword('senhaAtual')">👁️</button>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="novaSenha">Nova senha</label>
+                                    <div class="input-password-wrapper">
+                                        <input type="password" id="novaSenha" placeholder="Digite a nova senha" required minlength="6">
+                                        <button type="button" class="btn-toggle-password" onclick="togglePassword('novaSenha')">👁️</button>
+                                    </div>
+                                    <div class="password-strength" id="passwordStrength">
+                                        <div class="strength-bar"></div>
+                                        <span class="strength-text">Digite uma senha</span>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="confirmarSenha">Confirmar nova senha</label>
+                                    <div class="input-password-wrapper">
+                                        <input type="password" id="confirmarSenha" placeholder="Confirme a nova senha" required>
+                                        <button type="button" class="btn-toggle-password" onclick="togglePassword('confirmarSenha')">👁️</button>
+                                    </div>
+                                </div>
+                                <div class="form-actions">
+                                    <button type="submit" class="btn-primary">Alterar Senha</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="perfil-card card-danger">
+                        <div class="card-header">
+                            <h3>⚠️ Zona de Perigo</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="danger-item">
+                                <div class="danger-info">
+                                    <strong>Excluir minha conta</strong>
+                                    <p>Esta ação é irreversível. Todos os seus dados, residências e aparelhos serão permanentemente excluídos.</p>
+                                </div>
+                                <button class="btn-danger" onclick="confirmarExclusaoConta()">Excluir Conta</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Aba: Preferências -->
+                <div class="tab-content" id="tab-preferencias">
+                    <div class="perfil-card">
+                        <div class="card-header">
+                            <h3>Aparência</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="preference-item">
+                                <div class="preference-info">
+                                    <strong>Tema</strong>
+                                    <p>Escolha entre tema claro ou escuro</p>
+                                </div>
+                                <div class="theme-selector">
+                                    <button class="theme-option" data-theme="light" onclick="setTheme('light')">
+                                        <span>☀️</span> Claro
+                                    </button>
+                                    <button class="theme-option" data-theme="dark" onclick="setTheme('dark')">
+                                        <span>🌙</span> Escuro
+                                    </button>
+                                    <button class="theme-option active" data-theme="auto" onclick="setTheme('auto')">
+                                        <span>💻</span> Sistema
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="perfil-card">
+                        <div class="card-header">
+                            <h3>Notificações</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="preference-item">
+                                <div class="preference-info">
+                                    <strong>Alertas de consumo alto</strong>
+                                    <p>Receber alertas quando o consumo ultrapassar a média</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="alertaConsumo" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="preference-item">
+                                <div class="preference-info">
+                                    <strong>Relatório semanal</strong>
+                                    <p>Receber um resumo semanal do seu consumo por e-mail</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="relatorioSemanal">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="preference-item">
+                                <div class="preference-info">
+                                    <strong>Dicas de economia</strong>
+                                    <p>Receber dicas personalizadas para economizar energia</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="dicasEconomia" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2025 CCE - Controle de Consumo Energético. Todos os direitos reservados.</p>
+    </footer>
+
+    <!-- Modal de Confirmação de Exclusão -->
+    <div id="modalExcluirConta" class="modal">
+        <div class="modal-content modal-delete-account">
+            <button class="modal-close" onclick="fecharModalExcluirConta()">×</button>
+            <div class="modal-header delete-header">
+                <div class="delete-icon-wrapper">
+                    <span class="delete-icon">⚠️</span>
+                </div>
+                <h2>Excluir Conta</h2>
+                <p>Esta ação é <strong>irreversível</strong>. Todos os seus dados serão permanentemente excluídos.</p>
+            </div>
+            <form id="formExcluirConta" onsubmit="excluirConta(event)">
+                <div class="form-group">
+                    <label>Para confirmar, digite sua senha:</label>
+                    <input type="password" id="senhaConfirmacaoExclusao" placeholder="Sua senha" required>
+                </div>
+                <div class="form-group">
+                    <label>Digite "EXCLUIR" para confirmar:</label>
+                    <input type="text" id="textoConfirmacaoExclusao" placeholder="EXCLUIR" required pattern="EXCLUIR">
+                </div>
+                <div class="delete-actions">
+                    <button type="button" class="btn-cancel" onclick="fecharModalExcluirConta()">Cancelar</button>
+                    <button type="submit" class="btn-confirm-delete">
+                        <span>🗑️</span> Excluir Minha Conta
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="scripts/perfil.js"></script>
+</body>
+</html>

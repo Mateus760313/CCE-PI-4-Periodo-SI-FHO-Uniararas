@@ -17,27 +17,67 @@ if (!$usuarioId) {
 }
 
 $comodoId = intval($_POST['id'] ?? 0);
+$acao = $_POST['acao'] ?? 'delete_all'; // 'delete_all' ou 'move'
+$targetComodoId = intval($_POST['target_comodo_id'] ?? 0);
+
 if ($comodoId <= 0) {
     echo json_encode(['sucesso' => false, 'mensagem' => 'ID do cômodo inválido']);
     exit;
 }
 
 try {
-    // Verifica se o cômodo pertence ao usuário
-    $check = $pdo->prepare('SELECT c.id FROM comodos c JOIN residencias r ON r.id = c.residencia_id WHERE c.id = :cid AND r.usuario_id = :uid');
-    $check->execute([':cid' => $comodoId, ':uid' => $usuarioId]);
-    if (!$check->fetch()) {
-        http_response_code(403);
-        echo json_encode(['sucesso' => false, 'mensagem' => 'Cômodo não encontrado ou sem permissão']);
-        exit;
+    $pdo->beginTransaction();
+
+    // 1. Verifica se o cômodo pertence ao usuário e pega o ID da residência
+    $stmt = $pdo->prepare('
+        SELECT c.id, c.residencia_id 
+        FROM comodos c 
+        JOIN residencias r ON r.id = c.residencia_id 
+        WHERE c.id = :cid AND r.usuario_id = :uid
+    ');
+    $stmt->execute([':cid' => $comodoId, ':uid' => $usuarioId]);
+    $comodo = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$comodo) {
+        throw new Exception('Cômodo não encontrado ou sem permissão');
     }
 
-    $sql = 'DELETE FROM comodos WHERE id = :cid';
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute([':cid' => $comodoId]);
-    echo json_encode(['sucesso' => true, 'mensagem' => 'Cômodo excluído']);
-} catch (PDOException $e) {
+    $residenciaId = $comodo['residencia_id'];
+
+    // 2. Lógica de Aparelhos
+    if ($acao === 'move') {
+        if ($targetComodoId <= 0) {
+            throw new Exception('Cômodo de destino inválido');
+        }
+
+        // Verifica se o cômodo de destino existe e pertence à MESMA residência
+        $stmtCheck = $pdo->prepare('SELECT id FROM comodos WHERE id = :tid AND residencia_id = :rid');
+        $stmtCheck->execute([':tid' => $targetComodoId, ':rid' => $residenciaId]);
+        if (!$stmtCheck->fetch()) {
+            throw new Exception('Cômodo de destino inválido ou não pertence à mesma residência');
+        }
+
+        // Move os aparelhos
+        $stmtMove = $pdo->prepare('UPDATE aparelhos SET comodo_id = :tid WHERE comodo_id = :cid');
+        $stmtMove->execute([':tid' => $targetComodoId, ':cid' => $comodoId]);
+
+    } else {
+        // Padrão: delete_all (Deleta os aparelhos do cômodo)
+        $stmtDeleteApps = $pdo->prepare('DELETE FROM aparelhos WHERE comodo_id = :cid');
+        $stmtDeleteApps->execute([':cid' => $comodoId]);
+    }
+
+    // 3. Deleta o cômodo
+    $stmtDelete = $pdo->prepare('DELETE FROM comodos WHERE id = :cid');
+    $stmtDelete->execute([':cid' => $comodoId]);
+
+    $pdo->commit();
+    echo json_encode(['sucesso' => true, 'mensagem' => 'Cômodo excluído com sucesso']);
+
+} catch (Exception $e) {
+    if ($pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
     http_response_code(500);
-    error_log('Erro delete_comodo: ' . $e->getMessage());
-    echo json_encode(['sucesso' => false, 'mensagem' => 'Erro ao excluir cômodo']);
+    echo json_encode(['sucesso' => false, 'mensagem' => $e->getMessage()]);
 }

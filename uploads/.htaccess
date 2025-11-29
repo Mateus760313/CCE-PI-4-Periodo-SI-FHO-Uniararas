@@ -1,0 +1,14 @@
+# Desabilita execução de PHP e scripts na pasta uploads
+<FilesMatch "\.(php|php5|php7|php8|phtml|pl|py|cgi|asp|aspx|exe|sh|bat)$">
+    Order Deny,Allow
+    Deny from all
+</FilesMatch>
+
+# Permite apenas imagens
+<FilesMatch "\.(jpg|jpeg|png|gif|webp)$">
+    Order Allow,Deny
+    Allow from all
+</FilesMatch>
+
+# Desabilita listagem de diretório
+Options -Indexes

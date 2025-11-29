@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CCE - Relatórios Avançados</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/area-logada.css">
+    <link rel="stylesheet" href="styles/relatorios.css">
+    <link rel="icon" type="image/png" href="src/images/icon.png">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- HEADER -->
+    <header class="header">
+        <div class="container">
+            <a href="area-logada.html" class="logo">
+                <svg class="logo-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="32" cy="32" r="30" stroke="currentColor" stroke-width="4" fill="none"/>
+                    <path fill="currentColor" d="M26 14l-9 18h11l-5 18 18-27H31l5-9z"/>
+                </svg>
+                CCE
+            </a>
+            <div class="user-area">
+                <button class="theme-toggle" id="themeToggle">
+                    <span class="icon-sun">☀️</span>
+                    <span class="icon-moon">🌙</span>
+                </button>
+                
+                <div class="user-profile-container">
+                    <button class="user-trigger" id="userTrigger" aria-label="Menu do usuário">
+                        <div class="user-avatar" id="userAvatar">U</div>
+                        <img class="user-avatar-img" id="userAvatarImg" src="" alt="" style="display: none;">
+                    </button>
+
+                    <div class="user-dropdown" id="userDropdown">
+                        <div class="dropdown-header">
+                            <div class="dropdown-avatar-large" id="dropdownAvatar">U</div>
+                            <img class="dropdown-avatar-img" id="dropdownAvatarImg" src="" alt="" style="display: none;">
+                            <div class="dropdown-name" id="dropdownName">Carregando...</div>
+                            <div class="dropdown-email" id="dropdownEmail">carregando@email.com</div>
+                            <a href="perfil.html" class="btn-manage-account">Gerenciar conta</a>
+                        </div>
+                        
+                        <div class="dropdown-divider"></div>
+
+                        <div class="dropdown-menu-links">
+                            <a href="relatorios.html" class="dropdown-menu-item">
+                                <span class="menu-icon">📊</span>
+                                <span class="menu-text">Relatórios</span>
+                            </a>
+                        </div>
+                        
+                        <div class="dropdown-divider"></div>
+                        
+                        <div class="dropdown-footer">
+                            <button class="btn-logout-dropdown" onclick="logout()">
+                                <span class="logout-icon">🚪</span> Sair
+                            </button>
+                        </div>
+
+                        <div class="dropdown-links">
+                            <a href="#">Política de Privacidade</a> • <a href="#">Termos de Serviço</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+        <div class="relatorios-container">
+            <!-- Breadcrumb e Título -->
+            <div class="relatorios-header">
+                <div class="breadcrumb">
+                    <a href="area-logada.html">← Voltar para Dashboard</a>
+                </div>
+                <div class="header-title-section">
+                    <div class="header-title">
+                        <span class="header-icon">📊</span>
+                        <div>
+                            <h1>Relatórios Avançados</h1>
+                            <p>Análise inteligente do seu consumo energético</p>
+                        </div>
+                    </div>
+                    <div class="header-actions">
+                        <select id="selectResidencia" class="select-residencia">
+                            <option value="">Todas as Residências</option>
+                        </select>
+                        <button class="btn-primary" onclick="gerarRelatorio()">
+                            <span>🔄</span> Atualizar Relatório
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alertas Ativos -->
+            <div id="alertasContainer" class="alertas-container" style="display: none;">
+                <div class="alertas-header">
+                    <h3>🔔 Alertas Ativos</h3>
+                    <button class="btn-text" onclick="marcarTodosLidos()">Marcar todos como lidos</button>
+                </div>
+                <div id="alertasList" class="alertas-list"></div>
+            </div>
+
+            <!-- Cards de Resumo -->
+            <div class="resumo-cards">
+                <div class="resumo-card" id="cardConsumoAtual">
+                    <div class="resumo-icon">⚡</div>
+                    <div class="resumo-data">
+                        <span class="resumo-valor" id="consumoAtualKwh">--</span>
+                        <span class="resumo-label">kWh consumidos</span>
+                        <span class="resumo-sublabel">este mês</span>
+                    </div>
+                </div>
+                <div class="resumo-card" id="cardCustoAtual">
+                    <div class="resumo-icon">💰</div>
+                    <div class="resumo-data">
+                        <span class="resumo-valor" id="custoAtual">R$ --</span>
+                        <span class="resumo-label">gasto atual</span>
+                        <span class="resumo-sublabel">este mês</span>
+                    </div>
+                </div>
+                <div class="resumo-card" id="cardMeta">
+                    <div class="resumo-icon">🎯</div>
+                    <div class="resumo-data">
+                        <span class="resumo-valor" id="percentualMeta">--%</span>
+                        <span class="resumo-label">da meta</span>
+                        <span class="resumo-sublabel" id="valorMeta">R$ 0,00</span>
+                    </div>
+                </div>
+                <div class="resumo-card" id="cardPrevisao">
+                    <div class="resumo-icon">📈</div>
+                    <div class="resumo-data">
+                        <span class="resumo-valor" id="previsaoFimMes">R$ --</span>
+                        <span class="resumo-label">previsão</span>
+                        <span class="resumo-sublabel">fim do mês</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção de Meta -->
+            <div class="relatorio-section" id="secaoMeta">
+                <div class="section-header">
+                    <h2>🎯 Análise de Meta</h2>
+                    <button class="btn-secondary" onclick="abrirModalMeta()">
+                        <span>⚙️</span> Configurar Meta
+                    </button>
+                </div>
+                <div class="section-content">
+                    <div class="meta-progress-container">
+                        <div class="meta-progress-bar">
+                            <div class="meta-progress-fill" id="metaProgressFill" style="width: 0%"></div>
+                            <div class="meta-progress-marker" id="metaProgressMarker" style="left: 100%"></div>
+                        </div>
+                        <div class="meta-progress-labels">
+                            <span>R$ 0</span>
+                            <span id="metaProgressLabel">Meta: R$ 0</span>
+                        </div>
+                    </div>
+                    <div class="meta-mensagem" id="metaMensagem">
+                        <p>Configure uma meta para começar a acompanhar seus gastos.</p>
+                    </div>
+                    <div class="meta-detalhes" id="metaDetalhes" style="display: none;">
+                        <div class="meta-detalhe-item">
+                            <span class="detalhe-label">Gasto atual</span>
+                            <span class="detalhe-valor" id="metaGastoAtual">R$ 0,00</span>
+                        </div>
+                        <div class="meta-detalhe-item">
+                            <span class="detalhe-label">Disponível</span>
+                            <span class="detalhe-valor" id="metaDisponivel">R$ 0,00</span>
+                        </div>
+                        <div class="meta-detalhe-item">
+                            <span class="detalhe-label">Média diária permitida</span>
+                            <span class="detalhe-valor" id="metaMediaDiaria">R$ 0,00/dia</span>
+                        </div>
+                        <div class="meta-detalhe-item">
+                            <span class="detalhe-label">Dias restantes</span>
+                            <span class="detalhe-valor" id="metaDiasRestantes">0 dias</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Layout em 2 colunas -->
+            <div class="relatorio-grid">
+                <!-- Coluna Esquerda -->
+                <div class="relatorio-column">
+                    <!-- Top Aparelhos -->
+                    <div class="relatorio-section">
+                        <div class="section-header">
+                            <h2>⚡ Aparelhos que Mais Consomem</h2>
+                        </div>
+                        <div class="section-content">
+                            <div id="topAparelhosLista" class="top-aparelhos-lista">
+                                <div class="loading-placeholder">Carregando...</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Consumo por Cômodo -->
+                    <div class="relatorio-section">
+                        <div class="section-header">
+                            <h2>🏠 Consumo por Cômodo</h2>
+                        </div>
+                        <div class="section-content">
+                            <div class="chart-container">
+                                <canvas id="chartComodos"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Coluna Direita -->
+                <div class="relatorio-column">
+                    <!-- Comparativo Mensal -->
+                    <div class="relatorio-section">
+                        <div class="section-header">
+                            <h2>📅 Comparativo Mensal</h2>
+                        </div>
+                        <div class="section-content">
+                            <div id="comparativoContent" class="comparativo-content">
+                                <div class="loading-placeholder">Carregando...</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tendências -->
+                    <div class="relatorio-section">
+                        <div class="section-header">
+                            <h2>📈 Tendências</h2>
+                        </div>
+                        <div class="section-content">
+                            <div class="chart-container">
+                                <canvas id="chartTendencias"></canvas>
+                            </div>
+                            <div id="tendenciaMensagem" class="tendencia-mensagem"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Impacto de Novos Aparelhos -->
+            <div class="relatorio-section" id="secaoImpacto" style="display: none;">
+                <div class="section-header">
+                    <h2>🔌 Impacto de Alterações em Aparelhos</h2>
+                </div>
+                <div class="section-content">
+                    <div id="impactoLista" class="impacto-lista"></div>
+                </div>
+            </div>
+
+            <!-- Recomendações -->
+            <div class="relatorio-section" id="secaoRecomendacoes">
+                <div class="section-header">
+                    <h2>💡 Recomendações Inteligentes</h2>
+                </div>
+                <div class="section-content">
+                    <div id="recomendacoesLista" class="recomendacoes-lista">
+                        <div class="loading-placeholder">Carregando...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Previsões -->
+            <div class="relatorio-section" id="secaoPrevisoes">
+                <div class="section-header">
+                    <h2>🔮 Previsões</h2>
+                </div>
+                <div class="section-content">
+                    <div id="previsoesContent" class="previsoes-content">
+                        <div class="loading-placeholder">Carregando...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2025 CCE - Controle de Consumo Energético. Todos os direitos reservados.</p>
+    </footer>
+
+    <!-- Modal Configurar Meta -->
+    <div id="modalMeta" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="fecharModalMeta()">×</button>
+            <div class="modal-header">
+                <span class="modal-icon">🎯</span>
+                <h2>Configurar Meta Mensal</h2>
+                <p>Defina um limite de gasto para acompanhar seu consumo</p>
+            </div>
+            <form id="formMeta" onsubmit="salvarMeta(event)">
+                <div class="form-group">
+                    <label for="inputValorMeta">Valor da meta mensal (R$)</label>
+                    <div class="input-with-prefix">
+                        <span class="input-prefix">R$</span>
+                        <input type="number" id="inputValorMeta" min="1" step="0.01" placeholder="400.00" required>
+                    </div>
+                    <small class="input-hint">Sugestão baseada no seu consumo: <span id="sugestaoMeta">R$ 0,00</span></small>
+                </div>
+                <div class="form-group">
+                    <label for="selectResidenciaMeta">Aplicar para</label>
+                    <select id="selectResidenciaMeta">
+                        <option value="">Todas as residências</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" onclick="fecharModalMeta()">Cancelar</button>
+                    <button type="submit" class="btn-primary">Salvar Meta</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="scripts/relatorios.js"></script>
+</body>
+</html>

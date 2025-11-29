@@ -19,12 +19,36 @@ $acao = $_POST['acao'] ?? '';
 if ($acao === 'me') {
     // Se a sessão contém as chaves definidas no login, retornamos os dados
     if (!empty($_SESSION['usuario_id'])) {
-        echo json_encode([
-            'sucesso' => true,
-            'id' => $_SESSION['usuario_id'],
-            'nome' => $_SESSION['usuario_nome'] ?? '',
-            'email' => $_SESSION['usuario_email'] ?? ''
-        ]);
+        try {
+            // Busca dados completos do usuário no banco
+            $sql = "SELECT id, nome, email, telefone, foto_perfil, data_cadastro FROM usuarios WHERE id = :id";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([':id' => $_SESSION['usuario_id']]);
+            $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if ($usuario) {
+                echo json_encode([
+                    'sucesso' => true,
+                    'id' => $usuario['id'],
+                    'nome' => $usuario['nome'],
+                    'email' => $usuario['email'],
+                    'telefone' => $usuario['telefone'],
+                    'foto_perfil' => $usuario['foto_perfil'],
+                    'criado_em' => $usuario['data_cadastro']
+                ]);
+            } else {
+                http_response_code(401);
+                echo json_encode(['sucesso' => false, 'mensagem' => 'Usuário não encontrado.']);
+            }
+        } catch (PDOException $e) {
+            error_log("Erro get_usuario_logado: " . $e->getMessage());
+            echo json_encode([
+                'sucesso' => true,
+                'id' => $_SESSION['usuario_id'],
+                'nome' => $_SESSION['usuario_nome'] ?? '',
+                'email' => $_SESSION['usuario_email'] ?? ''
+            ]);
+        }
     } else {
         http_response_code(401); // Unauthorized
         echo json_encode(['sucesso' => false, 'mensagem' => 'Usuário não autenticado.']);

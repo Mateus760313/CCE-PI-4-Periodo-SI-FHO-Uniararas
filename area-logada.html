@@ -26,11 +26,44 @@
                     <span class="icon-sun">☀️</span>
                     <span class="icon-moon">🌙</span>
                 </button>
-                <div class="user-info">
-                    <div class="user-avatar" id="userAvatar">U</div>
-                    <span class="user-name" id="userName">Usuário</span>
+                
+                <div class="user-profile-container">
+                    <button class="user-trigger" id="userTrigger" aria-label="Menu do usuário">
+                        <div class="user-avatar" id="userAvatar">U</div>
+                        <img class="user-avatar-img" id="userAvatarImg" src="" alt="" style="display: none;">
+                    </button>
+
+                    <div class="user-dropdown" id="userDropdown">
+                        <div class="dropdown-header">
+                            <div class="dropdown-avatar-large" id="dropdownAvatar">U</div>
+                            <img class="dropdown-avatar-img" id="dropdownAvatarImg" src="" alt="" style="display: none;">
+                            <div class="dropdown-name" id="dropdownName">Carregando...</div>
+                            <div class="dropdown-email" id="dropdownEmail">carregando@email.com</div>
+                            <a href="perfil.html" class="btn-manage-account">Gerenciar conta</a>
+                        </div>
+                        
+                        <div class="dropdown-divider"></div>
+
+                        <div class="dropdown-menu-links">
+                            <a href="relatorios.html" class="dropdown-menu-item">
+                                <span class="menu-icon">📊</span>
+                                <span class="menu-text">Relatórios</span>
+                            </a>
+                        </div>
+                        
+                        <div class="dropdown-divider"></div>
+                        
+                        <div class="dropdown-footer">
+                            <button class="btn-logout-dropdown" onclick="logout()">
+                                <span class="logout-icon">🚪</span> Sair
+                            </button>
+                        </div>
+
+                        <div class="dropdown-links">
+                            <a href="#">Política de Privacidade</a> • <a href="#">Termos de Serviço</a>
+                        </div>
+                    </div>
                 </div>
-                <button class="btn-logout" onclick="logout()">Sair</button>
             </div>
         </div>
     </header>
@@ -38,17 +71,103 @@
     <!-- MAIN CONTENT -->
     <main class="main-content">
         <!-- DASHBOARD DE RESIDÊNCIAS -->
-        <div id="dashboardView">
-            <div class="page-header">
-                <h1>Minhas Residências</h1>
-                <p>Gerencie o consumo de energia de todas as suas residências</p>
+        <div id="dashboardView" class="dashboard-container">
+            <!-- Header com boas-vindas -->
+            <div class="dashboard-header">
+                <div class="welcome-section">
+                    <div class="welcome-text">
+                        <span class="welcome-greeting" id="welcomeGreeting">Olá! 👋</span>
+                        <h1>Minhas Residências</h1>
+                        <p>Gerencie o consumo de energia de todas as suas residências</p>
+                    </div>
+                    <div class="quick-stats">
+                        <div class="quick-stat-item">
+                            <span class="stat-icon">🏠</span>
+                            <div class="stat-data">
+                                <span class="stat-number" id="totalResidencias">0</span>
+                                <span class="stat-label">Residências</span>
+                            </div>
+                        </div>
+                        <div class="quick-stat-item">
+                            <span class="stat-icon">⚡</span>
+                            <div class="stat-data">
+                                <span class="stat-number" id="totalAparelhosGeral">0</span>
+                                <span class="stat-label">Aparelhos</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <div class="residencias-grid" id="residenciasGrid">
-                <!-- Residências serão inseridas aqui pelo JavaScript -->
-                <div class="residencia-card add-residencia-card" onclick="openModalResidencia()">
-                    <div class="add-icon">+</div>
-                    <div class="add-text">Adicionar Residência</div>
+            <!-- Layout principal com gráfico e residências -->
+            <div class="dashboard-layout">
+                <!-- Área do gráfico -->
+                <div class="chart-section">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <div class="chart-title-section">
+                                <div class="chart-title-icon">📊</div>
+                                <div class="chart-title-text">
+                                    <h3>Análise de Consumo</h3>
+                                    <p id="chartSubtitle">Evolução mensal do consumo de energia</p>
+                                </div>
+                            </div>
+                            <div class="chart-controls">
+                                <div class="chart-tabs">
+                                    <button class="chart-tab active" onclick="mudarGrafico('mensal', this)" data-tooltip="Consumo ao longo dos meses">
+                                        <span class="tab-icon">📈</span>
+                                        <span class="tab-text">Mensal</span>
+                                    </button>
+                                    <button class="chart-tab" onclick="mudarGrafico('top5', this)" data-tooltip="Aparelhos que mais consomem">
+                                        <span class="tab-icon">🔌</span>
+                                        <span class="tab-text">Top 5</span>
+                                    </button>
+                                    <button class="chart-tab" onclick="mudarGrafico('comodos', this)" data-tooltip="Consumo por cômodo">
+                                        <span class="tab-icon">🏠</span>
+                                        <span class="tab-text">Cômodos</span>
+                                    </button>
+                                </div>
+                                <div class="chart-extra-controls">
+                                    <button class="chart-extra-btn" onclick="mudarGrafico('projecao', this)" data-tooltip="Projeção até fim do mês">
+                                        <span>🎯</span>
+                                    </button>
+                                    <button class="chart-extra-btn" onclick="mudarGrafico('comparacao', this)" data-tooltip="Comparar com mês anterior">
+                                        <span>⚖️</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chart-body">
+                            <div class="chart-legend-custom" id="chartLegendCustom"></div>
+                            <div class="chart-container">
+                                <canvas id="mainChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-footer">
+                            <div class="chart-insight" id="chartInsight">
+                                <span class="insight-icon">💡</span>
+                                <span class="insight-text">Seu consumo reduziu 12% comparado ao mês anterior</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Seção de Residências -->
+                <div class="residencias-section">
+                    <div class="section-header">
+                        <h2>🏡 Suas Residências</h2>
+                        <button class="btn-add-inline" onclick="openModalResidencia()">
+                            <span>+</span> Nova Residência
+                        </button>
+                    </div>
+                    
+                    <div class="residencias-grid" id="residenciasGrid">
+                        <!-- Residências serão inseridas aqui pelo JavaScript -->
+                        <div class="residencia-card add-residencia-card" onclick="openModalResidencia()">
+                            <div class="add-icon">+</div>
+                            <div class="add-text">Adicionar Residência</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -196,7 +315,7 @@
 
                 <div class="form-group">
                     <label for="tarifaResidencia">Valor do KWh (R$) *</label>
-                    <input type="number" id="tarifaResidencia" placeholder="Ex: 0.75" required min="0.01" step="0.0001" readonly style="background-color: #e9ecef; cursor: not-allowed;">
+                    <input type="number" id="tarifaResidencia" placeholder="Ex: 0.75" required min="0.01" step="0.0001" readonly>
                     <small style="color: var(--text-light); font-size: 0.8rem; margin-top: 4px;">Calculado automaticamente: Base + Bandeira</small>
                 </div>
 
@@ -310,6 +429,66 @@
         </div>
     </div>
 
+    <!-- MODAL EXCLUIR CÔMODO -->
+    <div id="modalExcluirComodo" class="modal">
+        <div class="modal-content modal-delete-comodo">
+            <button class="modal-close" onclick="closeModalExcluirComodo()">×</button>
+            
+            <div class="modal-header delete-header">
+                <div class="delete-icon-wrapper">
+                    <span class="delete-icon">⚠️</span>
+                </div>
+                <h2>Excluir Cômodo</h2>
+                <p>Este cômodo possui aparelhos cadastrados.<br>O que deseja fazer com eles?</p>
+            </div>
+
+            <form id="formExcluirComodo" onsubmit="confirmarExclusaoComodo(event)">
+                <input type="hidden" id="idComodoExcluir">
+                
+                <div class="delete-options">
+                    <label class="delete-option delete-option-danger">
+                        <input type="radio" name="acaoExclusao" value="delete_all" checked onchange="toggleSelectComodo(false)">
+                        <div class="option-content">
+                            <div class="option-icon">🗑️</div>
+                            <div class="option-text">
+                                <strong>Excluir tudo</strong>
+                                <span>Remove o cômodo e todos os aparelhos</span>
+                            </div>
+                        </div>
+                        <div class="option-check">✓</div>
+                    </label>
+                    
+                    <label class="delete-option delete-option-safe">
+                        <input type="radio" name="acaoExclusao" value="move" onchange="toggleSelectComodo(true)">
+                        <div class="option-content">
+                            <div class="option-icon">📦</div>
+                            <div class="option-text">
+                                <strong>Mover aparelhos</strong>
+                                <span>Transfere os aparelhos para outro cômodo</span>
+                            </div>
+                        </div>
+                        <div class="option-check">✓</div>
+                    </label>
+                </div>
+
+                <div class="form-group select-destino-container" id="selectComodoDestinoContainer">
+                    <label for="selectComodoDestino">Para qual cômodo deseja mover?</label>
+                    <select id="selectComodoDestino">
+                        <!-- Opções preenchidas via JS -->
+                    </select>
+                </div>
+
+                <div class="delete-actions">
+                    <button type="button" class="btn-cancel" onclick="closeModalExcluirComodo()">Cancelar</button>
+                    <button type="submit" class="btn-confirm-delete">
+                        <span>🗑️</span> Confirmar Exclusão
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="scripts/area-logada.js"></script>
 </body>
 </html>

@@ -34,15 +34,46 @@ document.addEventListener('DOMContentLoaded', function() {
             const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
             document.documentElement.setAttribute('data-theme', newTheme);
             localStorage.setItem('theme', newTheme);
+            
+            // RECRIA O GRÁFICO COM AS NOVAS CORES DO TEMA
+            atualizarGraficoParaTema();
         });
     }
     
     carregarDadosUsuario(); // Carrega o nome e verifica a sessão
     setupImageSelector();
     setupModalCloseOnOutsideClick();
-    setupLogoutListener(); // Configura o botão de sair
+    setupUserDropdown(); // Configura o menu dropdown do usuário
     setupTimeSelector(); // Configura os botões de tempo
+    initCharts(); // Inicializa os gráficos
 });
+
+function setupUserDropdown() {
+    const trigger = document.getElementById('userTrigger');
+    const dropdown = document.getElementById('userDropdown');
+
+    if (trigger && dropdown) {
+        // Toggle dropdown ao clicar no avatar
+        trigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdown.classList.toggle('active');
+        });
+
+        // Fechar ao clicar fora
+        document.addEventListener('click', (e) => {
+            if (!dropdown.contains(e.target) && !trigger.contains(e.target)) {
+                dropdown.classList.remove('active');
+            }
+        });
+
+        // Fechar ao pressionar ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                dropdown.classList.remove('active');
+            }
+        });
+    }
+}
 
 function setupTimeSelector() {
     const timeBtns = document.querySelectorAll('.time-btn');
@@ -118,13 +149,6 @@ function setupTimeSelector() {
     }
 }
 
-function setupLogoutListener() {
-    const logoutBtn = document.getElementById('logoutBtn') || document.querySelector('.btn-logout');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', logout);
-    }
-}
-
 // ========== FUNÇÕES DE AUTENTICAÇÃO E INICIALIZAÇÃO ==========
 
 function carregarDadosUsuario() {
@@ -142,8 +166,58 @@ function carregarDadosUsuario() {
     .then(data => {
         if (data.sucesso) {
             usuarioLogado = data;
-            document.getElementById('userName').textContent = data.nome;
-            document.getElementById('userAvatar').textContent = data.nome.charAt(0).toUpperCase();
+            
+            // Preenche o avatar do header (trigger)
+            const inicial = data.nome.charAt(0).toUpperCase();
+            const temFoto = data.foto_perfil && data.foto_perfil.length > 0;
+            
+            const userAvatar = document.getElementById('userAvatar');
+            const userAvatarImg = document.getElementById('userAvatarImg');
+            
+            if (temFoto) {
+                if (userAvatar) userAvatar.style.display = 'none';
+                if (userAvatarImg) {
+                    userAvatarImg.src = data.foto_perfil;
+                    userAvatarImg.style.display = 'block';
+                }
+            } else {
+                if (userAvatar) {
+                    userAvatar.textContent = inicial;
+                    userAvatar.style.display = 'flex';
+                }
+                if (userAvatarImg) userAvatarImg.style.display = 'none';
+            }
+            
+            // Preenche o dropdown
+            const dropdownAvatar = document.getElementById('dropdownAvatar');
+            const dropdownAvatarImg = document.getElementById('dropdownAvatarImg');
+            const dropdownName = document.getElementById('dropdownName');
+            const dropdownEmail = document.getElementById('dropdownEmail');
+
+            if (temFoto) {
+                if (dropdownAvatar) dropdownAvatar.style.display = 'none';
+                if (dropdownAvatarImg) {
+                    dropdownAvatarImg.src = data.foto_perfil;
+                    dropdownAvatarImg.style.display = 'block';
+                }
+            } else {
+                if (dropdownAvatar) {
+                    dropdownAvatar.textContent = inicial;
+                    dropdownAvatar.style.display = 'flex';
+                }
+                if (dropdownAvatarImg) dropdownAvatarImg.style.display = 'none';
+            }
+            
+            if (dropdownName) dropdownName.textContent = data.nome;
+            if (dropdownEmail) dropdownEmail.textContent = data.email || 'Email não disponível';
+
+            // Preenche a saudação com o nome do usuário
+            const welcomeGreeting = document.getElementById('welcomeGreeting');
+            if (welcomeGreeting) {
+                const primeiroNome = data.nome.split(' ')[0];
+                welcomeGreeting.textContent = `Olá, ${primeiroNome}! 👋`;
+            }
+
             carregarResidencias(); 
         } else {
             throw new Error(data.mensagem || 'Falha ao obter dados do usuário.');
@@ -216,6 +290,26 @@ function renderizarResidencias() {
     const grid = document.getElementById('residenciasGrid');
     const addCard = grid.querySelector('.add-residencia-card');
     grid.querySelectorAll('.residencia-card:not(.add-residencia-card)').forEach(card => card.remove());
+
+    // Atualiza as estatísticas do dashboard
+    const totalResidenciasEl = document.getElementById('totalResidencias');
+    const totalAparelhosGeralEl = document.getElementById('totalAparelhosGeral');
+    
+    let totalAparelhos = 0;
+    residencias.forEach(r => {
+        totalAparelhos += parseInt(r.total_aparelhos || 0);
+    });
+
+    if (totalResidenciasEl) totalResidenciasEl.textContent = residencias.length;
+    if (totalAparelhosGeralEl) totalAparelhosGeralEl.textContent = totalAparelhos;
+
+    // Aplica classes para centralização
+    grid.classList.remove('single-residence', 'empty-grid');
+    if (residencias.length === 0) {
+        grid.classList.add('empty-grid');
+    } else if (residencias.length === 1) {
+        grid.classList.add('single-residence');
+    }
 
     residencias.forEach(residencia => {
         const card = document.createElement('div');
@@ -357,43 +451,32 @@ function setupTarifaCalculator() {
     const cidadeSelect = document.getElementById('cidadeResidencia');
     const tarifaInput = document.getElementById('tarifaResidencia');
 
-    // Configuração Global da Bandeira (Alterar aqui quando mudar a bandeira)
-    const BANDEIRA_ATUAL = 'vermelha1'; 
-
-    const tarifasBase = {
-        'Araras': 0.70,
-        'Rio Claro': 0.70,
-        'Leme': 0.70,
-        'Mogi-Guaçu': 0.70,
-        'Conchal': 0.70,
-        'Engenheiro Coelho': 0.70,
-        'Limeira': 0.70,
-        'Cordeirópolis': 0.70,
-        'Santa Gertrudes': 0.70
-    };
-
-    const adicionaisBandeira = {
-        'verde': 0,
-        'amarela': 0.01885,
-        'vermelha1': 0.04463,
-        'vermelha2': 0.07877
-    };
-
     function calcularTarifa() {
         const cidade = cidadeSelect.value;
         
-        if (cidade && tarifasBase[cidade] !== undefined) {
-            const base = tarifasBase[cidade];
-            const adicional = adicionaisBandeira[BANDEIRA_ATUAL] || 0;
-            const total = base + adicional;
+        if (cidade) {
+            // Mostra que está carregando (opcional, visual feedback)
+            tarifaInput.style.opacity = '0.5';
             
-            // Arredonda para 4 casas decimais para precisão
-            tarifaInput.value = total.toFixed(4);
+            // Chama nossa nova API
+            fetch(`php/api_tarifa.php?cidade=${encodeURIComponent(cidade)}&uf=SP`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.sucesso) {
+                        tarifaInput.value = data.tarifa_final.toFixed(4);
+                        console.log(`Tarifa carregada: ${data.tarifa_final} (${data.fonte_dados}) - Bandeira: ${data.bandeira.tipo}`);
+                    } else {
+                        console.error('Erro na API de tarifas');
+                    }
+                })
+                .catch(err => console.error('Erro ao buscar tarifa:', err))
+                .finally(() => {
+                    tarifaInput.style.opacity = '1';
+                });
         }
     }
 
     cidadeSelect.onchange = calcularTarifa;
-    // Removemos o listener da bandeira pois agora é fixa
 }
 
 function closeModalResidencia() {
@@ -744,9 +827,89 @@ function openModalEditarComodo(id, nomeAtual) {
 }
 
 function deletarComodo(id) {
-    if (!confirm('Deseja realmente excluir este cômodo? Todos os aparelhos vinculados ficarão sem cômodo.')) return;
+    const comodo = comodos.find(c => Number(c.id) === Number(id));
+    if (!comodo) return;
+
+    const temAparelhos = parseInt(comodo.aparelho_count || 0) > 0;
+
+    if (!temAparelhos) {
+        // Se não tem aparelhos, exclui direto (com confirmação simples)
+        if (!confirm('Deseja realmente excluir este cômodo?')) return;
+        executarExclusaoComodo(id, 'delete_all');
+    } else {
+        // Se tem aparelhos, abre o modal de decisão
+        abrirModalExcluirComodo(id);
+    }
+}
+
+function abrirModalExcluirComodo(id) {
+    const modal = document.getElementById('modalExcluirComodo');
+    const select = document.getElementById('selectComodoDestino');
+    const inputId = document.getElementById('idComodoExcluir');
+    
+    inputId.value = id;
+    
+    // Preenche o select com outros cômodos da mesma residência
+    select.innerHTML = '<option value="" disabled selected>Selecione um cômodo...</option>';
+    const outrosComodos = comodos.filter(c => Number(c.id) !== Number(id));
+    
+    if (outrosComodos.length === 0) {
+        // Se não tem outros cômodos, desabilita a opção de mover
+        document.querySelector('input[value="move"]').disabled = true;
+        document.querySelector('input[value="move"]').parentElement.style.opacity = '0.5';
+        document.querySelector('input[value="delete_all"]').checked = true;
+        toggleSelectComodo(false);
+    } else {
+        document.querySelector('input[value="move"]').disabled = false;
+        document.querySelector('input[value="move"]').parentElement.style.opacity = '1';
+        outrosComodos.forEach(c => {
+            const option = document.createElement('option');
+            option.value = c.id;
+            option.textContent = c.nome;
+            select.appendChild(option);
+        });
+    }
+
+    modal.classList.add('active');
+}
+
+function closeModalExcluirComodo() {
+    document.getElementById('modalExcluirComodo').classList.remove('active');
+}
+
+function toggleSelectComodo(show) {
+    const container = document.getElementById('selectComodoDestinoContainer');
+    const select = document.getElementById('selectComodoDestino');
+    if (show) {
+        container.classList.add('visible');
+    } else {
+        container.classList.remove('visible');
+    }
+    select.required = show;
+}
+
+function confirmarExclusaoComodo(event) {
+    event.preventDefault();
+    const id = document.getElementById('idComodoExcluir').value;
+    const acao = document.querySelector('input[name="acaoExclusao"]:checked').value;
+    const destinoId = document.getElementById('selectComodoDestino').value;
+
+    if (acao === 'move' && !destinoId) {
+        alert('Por favor, selecione um cômodo de destino.');
+        return;
+    }
+
+    executarExclusaoComodo(id, acao, destinoId);
+}
+
+function executarExclusaoComodo(id, acao, destinoId = null) {
     const formData = new FormData();
     formData.append('id', id);
+    formData.append('acao', acao); // 'delete_all' ou 'move'
+    if (destinoId) {
+        formData.append('target_comodo_id', destinoId);
+    }
+
     fetch('php/delete_comodo.php', {
         method: 'POST',
         body: formData,
@@ -755,6 +918,7 @@ function deletarComodo(id) {
     .then(response => response.json())
     .then(data => {
         if (data.sucesso) {
+            closeModalExcluirComodo();
             carregarComodos(residenciaAtual.id);
             alert('Cômodo excluído com sucesso!');
         } else {
@@ -1106,4 +1270,542 @@ function setupModalCloseOnOutsideClick() {
             }
         });
     });
+}
+
+// ========== GRÁFICOS (CHART.JS) ==========
+let chartInstance = null;
+let dashboardData = null; // Armazena os dados reais do dashboard
+let currentChartType = 'mensal'; // Armazena o tipo de gráfico atual
+
+// Função para obter a cor primária correta baseada no tema atual
+function getThemeColor() {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    // Verde para tema claro, Amarelo para tema escuro
+    return isDark ? '#fbbf24' : '#10b981';
+}
+
+// Função para atualizar o gráfico quando o tema muda
+function atualizarGraficoParaTema() {
+    // Pequeno delay para garantir que as variáveis CSS foram atualizadas
+    setTimeout(() => {
+        if (chartInstance) {
+            // Descobre qual aba está ativa
+            const activeTab = document.querySelector('.chart-tab.active') || 
+                              document.querySelector('.chart-extra-btn.active');
+            
+            // Determina o tipo atual baseado na aba ativa ou usa o armazenado
+            let tipo = currentChartType;
+            if (activeTab) {
+                const onclick = activeTab.getAttribute('onclick');
+                if (onclick) {
+                    const match = onclick.match(/mudarGrafico\('(\w+)'/);
+                    if (match) tipo = match[1];
+                }
+            }
+            
+            // Recria o gráfico com as novas cores
+            mudarGrafico(tipo, activeTab);
+        }
+    }, 50);
+}
+
+function initCharts() {
+    // Carrega os dados reais antes de renderizar
+    carregarDadosDashboard();
+}
+
+function carregarDadosDashboard() {
+    fetch('php/get_dashboard_data.php', {
+        method: 'GET',
+        credentials: 'include'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.sucesso) {
+            dashboardData = data;
+            // Renderiza o gráfico padrão (Mensal) após carregar dados
+            // Se o usuário já estiver em outra aba, mantém a aba (mas aqui é init, então padrão mensal)
+            mudarGrafico('mensal', document.querySelector('.chart-tab.active'));
+        } else {
+            console.error('Erro ao carregar dados do dashboard:', data.mensagem);
+            // Fallback para dados fictícios se falhar, ou apenas renderiza vazio
+            mudarGrafico('mensal', document.querySelector('.chart-tab.active'));
+        }
+    })
+    .catch(error => {
+        console.error('Erro na requisição do dashboard:', error);
+        mudarGrafico('mensal', document.querySelector('.chart-tab.active'));
+    });
+}
+
+function mudarGrafico(tipo, element) {
+    // Armazena o tipo atual para uso ao trocar tema
+    currentChartType = tipo;
+    
+    // Atualiza UI das tabs se clicado em uma tab
+    if (element && element.classList.contains('chart-tab')) {
+        document.querySelectorAll('.chart-tab').forEach(tab => tab.classList.remove('active'));
+        document.querySelectorAll('.chart-extra-btn').forEach(btn => btn.classList.remove('active'));
+        element.classList.add('active');
+    } else if (element && element.classList.contains('chart-extra-btn')) {
+        document.querySelectorAll('.chart-tab').forEach(tab => tab.classList.remove('active'));
+        document.querySelectorAll('.chart-extra-btn').forEach(btn => btn.classList.remove('active'));
+        element.classList.add('active');
+    }
+
+    const ctx = document.getElementById('mainChart').getContext('2d');
+    
+    // Destrói gráfico anterior se existir
+    if (chartInstance) {
+        chartInstance.destroy();
+        chartInstance = null;
+    }
+
+    // Configuração base para cores e fontes
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const textLight = isDark ? '#94a3b8' : '#64748b';
+    const cardBorder = isDark ? '#334155' : '#e2e8f0';
+    Chart.defaults.color = textLight;
+    Chart.defaults.borderColor = cardBorder;
+    
+    // USA A FUNÇÃO getThemeColor() PARA GARANTIR COR CORRETA
+    const primaryColor = getThemeColor();
+    const dangerColor = '#ef4444';
+
+    let config;
+    let subtitle = '';
+    let insight = '';
+    
+    // Se não tiver dados carregados ainda, usa fictícios ou vazio (tratado dentro das configs se quiser, mas aqui vamos passar null se não tiver)
+    const dados = dashboardData;
+
+    switch(tipo) {
+        case 'mensal':
+            config = getConfigConsumoMensal(primaryColor, dados);
+            subtitle = 'Evolução mensal do consumo de energia';
+            insight = '💡 Seu consumo estimado atual é de ' + (dados ? parseFloat(dados.total_mensal).toFixed(1) : '0') + ' kWh/mês.';
+            break;
+        case 'top5':
+            config = getConfigTop5Aparelhos(primaryColor, dados);
+            subtitle = 'Aparelhos com maior consumo de energia';
+            if (dados && dados.top5 && dados.top5.length > 0) {
+                const top1 = dados.top5[0];
+                insight = `⚡ O aparelho <strong>${top1.nome}</strong> é o maior consumidor (${parseFloat(top1.consumo_kwh).toFixed(1)} kWh).`;
+            } else {
+                insight = '⚡ Cadastre seus aparelhos para ver o ranking de consumo.';
+            }
+            break;
+        case 'comodos':
+            config = getConfigConsumoComodos(dados);
+            subtitle = 'Distribuição do consumo por cômodo';
+            if (dados && dados.comodos && dados.comodos.length > 0) {
+                const topComodo = dados.comodos[0];
+                insight = `🏠 O cômodo <strong>${topComodo.nome}</strong> consome mais energia (${parseFloat(topComodo.consumo_kwh).toFixed(1)} kWh).`;
+            } else {
+                insight = '🏠 Cadastre cômodos e aparelhos para ver a distribuição.';
+            }
+            break;
+        case 'projecao':
+            config = getConfigProjecao(primaryColor, dangerColor, dados);
+            subtitle = 'Projeção de consumo até o fim do mês';
+            insight = '🎯 Projeção baseada no seu uso diário atual.';
+            break;
+        case 'comparacao':
+            config = getConfigComparacao(primaryColor, dangerColor, dados);
+            subtitle = 'Comparação com o mês anterior';
+            insight = '⚠️ Comparativo simulado (histórico indisponível).';
+            break;
+        default:
+            config = getConfigConsumoMensal(primaryColor, dados);
+            subtitle = 'Evolução mensal do consumo de energia';
+            insight = '💡 Selecione um gráfico para ver insights personalizados.';
+    }
+
+    // Atualiza subtitle e insight
+    const subtitleEl = document.getElementById('chartSubtitle');
+    const insightEl = document.getElementById('chartInsight');
+    if (subtitleEl) subtitleEl.textContent = subtitle;
+    if (insightEl) {
+        insightEl.innerHTML = `<span class="insight-icon">${insight.charAt(0)}</span><span class="insight-text">${insight.substring(2)}</span>`;
+    }
+
+    chartInstance = new Chart(ctx, config);
+}
+
+// 1. Gráfico de Consumo Mensal (Line)
+function getConfigConsumoMensal(primaryColor, dados) {
+    // Como não temos histórico real no BD, vamos simular um histórico
+    // onde o mês atual é o valor real calculado.
+    
+    const atual = dados ? parseFloat(dados.total_mensal) : 0;
+    // Simula meses anteriores com variação aleatória pequena
+    const m1 = Math.max(0, atual * 0.9);
+    const m2 = Math.max(0, atual * 1.1);
+    const m3 = Math.max(0, atual * 0.95);
+    const m4 = Math.max(0, atual * 1.05);
+    const m5 = Math.max(0, atual * 0.98);
+
+    return {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Atual'],
+            datasets: [{
+                label: 'Consumo (kWh)',
+                data: [m1, m2, m3, m4, m5, atual], 
+                borderColor: primaryColor,
+                backgroundColor: createGradient(primaryColor),
+                tension: 0.4,
+                fill: true,
+                pointRadius: 5,
+                pointHoverRadius: 8,
+                pointBackgroundColor: '#fff',
+                pointBorderColor: primaryColor,
+                pointBorderWidth: 3,
+                pointHoverBackgroundColor: primaryColor,
+                pointHoverBorderColor: '#fff',
+                borderWidth: 3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            },
+            plugins: {
+                legend: { 
+                    position: 'top',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 20,
+                        font: { size: 12, weight: '600' }
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(30, 41, 59, 0.95)',
+                    titleFont: { size: 14, weight: '700' },
+                    bodyFont: { size: 13 },
+                    padding: 14,
+                    cornerRadius: 10,
+                    displayColors: true,
+                    boxPadding: 6
+                }
+            },
+            scales: {
+                y: { 
+                    beginAtZero: true, 
+                    title: { display: true, text: 'kWh', font: { weight: '600' } },
+                    grid: { color: 'rgba(0,0,0,0.05)' }
+                },
+                x: {
+                    grid: { display: false }
+                }
+            }
+        }
+    };
+}
+
+// Função auxiliar para criar gradiente
+function createGradient(color) {
+    const canvas = document.getElementById('mainChart');
+    if (!canvas) return color + '30';
+    const ctx = canvas.getContext('2d');
+    const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+    gradient.addColorStop(0, color + '40');
+    gradient.addColorStop(1, color + '05');
+    return gradient;
+}
+
+// 2. Gráfico Top 5 Aparelhos (Bar Horizontal)
+function getConfigTop5Aparelhos(primaryColor, dados) {
+    let labels = [];
+    let values = [];
+
+    if (dados && dados.top5 && dados.top5.length > 0) {
+        labels = dados.top5.map(item => item.nome);
+        values = dados.top5.map(item => parseFloat(item.consumo_kwh));
+    } else {
+        labels = ['Sem dados'];
+        values = [0];
+    }
+
+    return {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Consumo (kWh)',
+                data: values,
+                backgroundColor: [
+                    '#10b981',
+                    '#3b82f6',
+                    '#f59e0b',
+                    '#8b5cf6',
+                    '#ec4899'
+                ],
+                borderRadius: 8,
+                borderSkipped: false,
+                barThickness: 28
+            }]
+        },
+        options: {
+            indexAxis: 'y', // Barra horizontal
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'rgba(30, 41, 59, 0.95)',
+                    titleFont: { size: 14, weight: '700' },
+                    bodyFont: { size: 13 },
+                    padding: 14,
+                    cornerRadius: 10,
+                    callbacks: {
+                        label: function(context) {
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const val = context.raw || 0;
+                            const percent = total > 0 ? ((val / total) * 100).toFixed(1) : 0;
+                            return `${val.toFixed(2)} kWh (${percent}%)`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: { color: 'rgba(0,0,0,0.05)' },
+                    title: { display: true, text: 'kWh', font: { weight: '600' } }
+                },
+                y: {
+                    grid: { display: false },
+                    ticks: { font: { weight: '500' } }
+                }
+            }
+        }
+    };
+}
+
+// 3. Gráfico por Cômodo (Doughnut)
+function getConfigConsumoComodos(dados) {
+    let labels = [];
+    let values = [];
+
+    if (dados && dados.comodos && dados.comodos.length > 0) {
+        labels = dados.comodos.map(item => item.nome);
+        values = dados.comodos.map(item => parseFloat(item.consumo_kwh));
+    } else {
+        labels = ['Sem dados'];
+        values = [1]; // Valor dummy para aparecer algo vazio
+    }
+
+    return {
+        type: 'doughnut',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: values,
+                backgroundColor: [
+                    '#10b981', // Primary
+                    '#3b82f6', // Blue
+                    '#f59e0b', // Amber
+                    '#ef4444', // Red
+                    '#8b5cf6', // Purple
+                    '#64748b'  // Slate
+                ],
+                borderWidth: 0,
+                hoverOffset: 12
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { 
+                    position: 'right',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 16,
+                        font: { size: 12, weight: '500' },
+                        generateLabels: function(chart) {
+                            const data = chart.data;
+                            if (data.labels.length && data.labels[0] === 'Sem dados') return [];
+                            return data.labels.map((label, i) => {
+                                const val = data.datasets[0].data[i];
+                                const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                const percent = total > 0 ? ((val / total) * 100).toFixed(0) : 0;
+                                return {
+                                    text: `${label} (${percent}%)`,
+                                    fillStyle: data.datasets[0].backgroundColor[i],
+                                    hidden: false,
+                                    index: i,
+                                    pointStyle: 'rectRounded'
+                                };
+                            });
+                        }
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(30, 41, 59, 0.95)',
+                    titleFont: { size: 14, weight: '700' },
+                    bodyFont: { size: 13 },
+                    padding: 14,
+                    cornerRadius: 10
+                }
+            },
+            cutout: '65%',
+            radius: '90%'
+        }
+    };
+}
+
+// 4. Gráfico de Projeção (Line)
+function getConfigProjecao(primaryColor, dangerColor, dados) {
+    // Simulação baseada no total mensal atual
+    const totalAtual = dados ? parseFloat(dados.total_mensal) : 0;
+    const diasNoMes = 30;
+    const consumoDiario = totalAtual / diasNoMes;
+    
+    // Gera dados para 30 dias
+    const dias = Array.from({length: 30}, (_, i) => i + 1);
+    const consumoAcumulado = [];
+    let acumulado = 0;
+    
+    // Simula que estamos no dia 20
+    const diaAtual = 20;
+    
+    for (let i = 0; i < diaAtual; i++) {
+        // Variação aleatória diária
+        const variacao = (Math.random() * 0.4) + 0.8; // 0.8 a 1.2
+        acumulado += consumoDiario * variacao;
+        consumoAcumulado.push(acumulado);
+    }
+
+    // Projeção linear para o resto
+    const projecao = [...consumoAcumulado];
+    let projecaoAcumulada = acumulado;
+    for (let i = diaAtual; i < 30; i++) {
+        projecaoAcumulada += consumoDiario;
+        projecao.push(projecaoAcumulada);
+    }
+
+    // Preenche array real com nulls
+    const consumoRealCompleto = [...consumoAcumulado, ...Array(30 - diaAtual).fill(null)];
+
+    return {
+        type: 'line',
+        data: {
+            labels: dias,
+            datasets: [{
+                label: 'Consumo Real (Simulado)',
+                data: consumoRealCompleto,
+                borderColor: primaryColor,
+                backgroundColor: primaryColor,
+                tension: 0.3,
+                pointRadius: 2,
+                pointHoverRadius: 6,
+                borderWidth: 3,
+                spanGaps: false
+            }, {
+                label: 'Projeção',
+                data: projecao,
+                borderColor: '#94a3b8',
+                borderDash: [6, 4],
+                tension: 0.3,
+                pointRadius: 0,
+                fill: false,
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        usePointStyle: true,
+                        padding: 20,
+                        font: { size: 12, weight: '600' }
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(30, 41, 59, 0.95)',
+                    padding: 14,
+                    cornerRadius: 10
+                }
+            },
+            scales: {
+                y: {
+                    grid: { color: 'rgba(0,0,0,0.05)' },
+                    title: { display: true, text: 'kWh Acumulado', font: { weight: '600' } }
+                },
+                x: {
+                    grid: { display: false },
+                    title: { display: true, text: 'Dia do Mês', font: { weight: '600' } }
+                }
+            }
+        }
+    };
+}
+
+// 5. Comparação Mês Anterior (Bar)
+function getConfigComparacao(primaryColor, dangerColor, dados) {
+    const atual = dados ? parseFloat(dados.total_mensal) : 0;
+    // Simula mês anterior sendo 10% menor ou maior
+    const anterior = atual * 0.9; 
+    
+    const aumentou = atual > anterior;
+    const diferenca = Math.abs(atual - anterior);
+    const percentual = anterior > 0 ? ((diferenca / anterior) * 100).toFixed(1) : 0;
+    
+    return {
+        type: 'bar',
+        data: {
+            labels: ['Mês Anterior', 'Mês Atual'],
+            datasets: [{
+                label: 'Consumo Total (kWh)',
+                data: [anterior, atual],
+                backgroundColor: [
+                    '#94a3b8', // Cinza para anterior
+                    aumentou ? dangerColor : primaryColor // Vermelho se aumentou, Verde se diminuiu
+                ],
+                borderRadius: 12,
+                barThickness: 80,
+                borderSkipped: false
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                title: { 
+                    display: true, 
+                    text: aumentou ? `⚠️ Aumento de ${percentual}% no consumo` : `✅ Redução de ${percentual}% no consumo`,
+                    font: { size: 16, weight: '700' },
+                    padding: { bottom: 20 }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(30, 41, 59, 0.95)',
+                    padding: 14,
+                    cornerRadius: 10,
+                    callbacks: {
+                        label: function(context) {
+                            return `${parseFloat(context.raw).toFixed(2)} kWh`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: { 
+                    beginAtZero: true,
+                    grid: { color: 'rgba(0,0,0,0.05)' },
+                    title: { display: true, text: 'kWh', font: { weight: '600' } }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { font: { size: 14, weight: '600' } }
+                }
+            }
+        }
+    };
 }

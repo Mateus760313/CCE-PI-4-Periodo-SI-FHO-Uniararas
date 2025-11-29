@@ -1598,6 +1598,10 @@ function getConfigConsumoComodos(dados) {
         values = [1]; // Valor dummy para aparecer algo vazio
     }
 
+    // Cor da legenda baseada no tema atual
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const legendColor = isDark ? '#f1f5f9' : '#334155';
+
     return {
         type: 'doughnut',
         data: {
@@ -1623,9 +1627,10 @@ function getConfigConsumoComodos(dados) {
                 legend: { 
                     position: 'right',
                     labels: {
+                        color: legendColor,
                         usePointStyle: true,
                         padding: 16,
-                        font: { size: 12, weight: '500' },
+                        font: { size: 13, weight: '600' },
                         generateLabels: function(chart) {
                             const data = chart.data;
                             if (data.labels.length && data.labels[0] === 'Sem dados') return [];
@@ -1636,6 +1641,7 @@ function getConfigConsumoComodos(dados) {
                                 return {
                                     text: `${label} (${percent}%)`,
                                     fillStyle: data.datasets[0].backgroundColor[i],
+                                    fontColor: legendColor,
                                     hidden: false,
                                     index: i,
                                     pointStyle: 'rectRounded'

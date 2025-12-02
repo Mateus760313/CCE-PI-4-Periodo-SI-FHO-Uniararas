@@ -21,6 +21,7 @@ $comodoId = intval($_POST['comodo_id'] ?? 0);
 $nome = trim($_POST['nome'] ?? '');
 $potencia = intval($_POST['potencia'] ?? 0);
 $horas = floatval($_POST['horas'] ?? 0);
+$fator = floatval($_POST['fator_uso'] ?? 1.0);
 
 if ($comodoId <= 0 || $nome === '' || $potencia <= 0) {
     echo json_encode(['sucesso'=>false,'mensagem'=>'Dados inválidos']);
@@ -40,7 +41,7 @@ try {
     }
     $residenciaId = $row['residencia_id'];
 
-    $sql = "INSERT INTO aparelhos (residencia_id, usuario_id, comodo_id, nome, potencia_watts, horas_uso) VALUES (:rid, :uid, :cid, :nome, :pot, :horas) RETURNING id";
+    $sql = "INSERT INTO aparelhos (residencia_id, usuario_id, comodo_id, nome, potencia_watts, horas_uso, fator_uso) VALUES (:rid, :uid, :cid, :nome, :pot, :horas, :fator) RETURNING id";
     $stmt = $pdo->prepare($sql);
     $stmt->execute([
         ':rid' => $residenciaId,
@@ -48,10 +49,11 @@ try {
         ':cid' => $comodoId,
         ':nome' => $nome,
         ':pot' => $potencia,
-        ':horas' => $horas
+        ':horas' => $horas,
+        ':fator' => $fator
     ]);
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
-    echo json_encode(['sucesso'=>true,'mensagem'=>'Aparelho criado','aparelho'=>['id'=>$row['id'],'nome'=>$nome,'potencia'=>$potencia,'horasUso'=>$horas,'comodoId'=>$comodoId,'residenciaId'=>$residenciaId]]);
+    echo json_encode(['sucesso'=>true,'mensagem'=>'Aparelho criado','aparelho'=>['id'=>$row['id'],'nome'=>$nome,'potencia'=>$potencia,'horasUso'=>$horas,'fatorUso'=>$fator,'comodoId'=>$comodoId,'residenciaId'=>$residenciaId]]);
 } catch (PDOException $e) {
     http_response_code(500);
     error_log("Erro create_aparelho: " . $e->getMessage());

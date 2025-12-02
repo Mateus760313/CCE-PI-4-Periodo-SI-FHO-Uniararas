@@ -198,11 +198,15 @@ function renderizarMeta(meta) {
     }
     
     // Atualizar card
-    document.getElementById('percentualMeta').textContent = `${meta.percentual_atual}%`;
+    const percentualTexto = !isNaN(parseFloat(meta.percentual_atual)) ? parseFloat(meta.percentual_atual).toFixed(1) : '0.0';
+    document.getElementById('percentualMeta').textContent = `${percentualTexto}%`;
     document.getElementById('valorMeta').textContent = `de ${formatCurrency(meta.valor_meta)}`;
     
     // Progress bar
-    const percentual = Math.min(meta.percentual_atual, 100);
+    let percentual = parseFloat(meta.percentual_atual);
+    if (isNaN(percentual)) percentual = 0;
+    percentual = Math.min(Math.max(0, percentual), 100); // Garante entre 0 e 100
+    
     progressFill.style.width = `${percentual}%`;
     progressLabel.textContent = `Meta: ${formatCurrency(meta.valor_meta)}`;
     
@@ -224,9 +228,15 @@ function renderizarMeta(meta) {
     
     // Detalhes
     detalhesEl.style.display = 'grid';
-    document.getElementById('metaGastoAtual').textContent = formatCurrency(meta.custo_atual);
-    document.getElementById('metaDisponivel').textContent = formatCurrency(Math.max(0, meta.valor_meta - meta.custo_atual));
-    document.getElementById('metaMediaDiaria').textContent = `${formatCurrency(meta.valor_diario_permitido)}/dia`;
+    
+    const custoAtual = parseFloat(meta.custo_atual) || 0;
+    const valorMeta = parseFloat(meta.valor_meta) || 0;
+    const disponivel = Math.max(0, valorMeta - custoAtual);
+    const diario = parseFloat(meta.valor_diario_permitido) || 0;
+
+    document.getElementById('metaGastoAtual').textContent = formatCurrency(custoAtual);
+    document.getElementById('metaDisponivel').textContent = formatCurrency(disponivel);
+    document.getElementById('metaMediaDiaria').textContent = `${formatCurrency(diario)}/dia`;
     document.getElementById('metaDiasRestantes').textContent = `${meta.dias_restantes} dias`;
 }
 
@@ -620,10 +630,11 @@ function marcarTodosLidos() {
 
 // ========== UTILITÁRIOS ==========
 function formatCurrency(value) {
+    const number = parseFloat(value);
     return new Intl.NumberFormat('pt-BR', {
         style: 'currency',
         currency: 'BRL'
-    }).format(value || 0);
+    }).format(isNaN(number) ? 0 : number);
 }
 
 function formatNumber(value) {

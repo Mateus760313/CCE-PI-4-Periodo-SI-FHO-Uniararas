@@ -33,20 +33,20 @@ try {
                 c.residencia_id, 
                 c.imagem,
                 COUNT(a.id) AS aparelho_count,
-                COALESCE(SUM((a.potencia_watts * a.horas_uso / 1000) * 30), 0) AS consumo_total_kwh,
-                COALESCE(SUM((a.potencia_watts * a.horas_uso / 1000) * 30 * COALESCE(r.tarifa_kwh, 0)), 0) AS custo_total_reais,
+                COALESCE(SUM((a.potencia_watts * a.horas_uso * COALESCE(a.fator_uso, 1) / 1000) * 30), 0) AS consumo_total_kwh,
+                COALESCE(SUM((a.potencia_watts * a.horas_uso * COALESCE(a.fator_uso, 1) / 1000) * 30 * COALESCE(r.tarifa_kwh, 0)), 0) AS custo_total_reais,
                 (
                     SELECT a2.nome 
                     FROM aparelhos a2 
                     WHERE a2.comodo_id = c.id 
-                    ORDER BY (a2.potencia_watts * a2.horas_uso) DESC 
+                    ORDER BY (a2.potencia_watts * a2.horas_uso * COALESCE(a2.fator_uso, 1)) DESC 
                     LIMIT 1
                 ) as vilao_nome,
                 (
-                    SELECT ((a2.potencia_watts * a2.horas_uso / 1000) * 30 * COALESCE(r.tarifa_kwh, 0))
+                    SELECT ((a2.potencia_watts * a2.horas_uso * COALESCE(a2.fator_uso, 1) / 1000) * 30 * COALESCE(r.tarifa_kwh, 0))
                     FROM aparelhos a2 
                     WHERE a2.comodo_id = c.id 
-                    ORDER BY (a2.potencia_watts * a2.horas_uso) DESC 
+                    ORDER BY (a2.potencia_watts * a2.horas_uso * COALESCE(a2.fator_uso, 1)) DESC 
                     LIMIT 1
                 ) as vilao_custo
             FROM comodos c

@@ -20,6 +20,8 @@ $aparelhoId = intval($_POST['id'] ?? 0);
 $nome = trim($_POST['nome'] ?? '');
 $potencia = intval($_POST['potencia'] ?? 0);
 $horas = floatval($_POST['horas'] ?? 0);
+$fator = floatval($_POST['fator_uso'] ?? 1.0);
+
 if ($aparelhoId <= 0 || $nome === '' || $potencia <= 0) {
     echo json_encode(['sucesso' => false, 'mensagem' => 'Dados inválidos']);
     exit;
@@ -35,9 +37,9 @@ try {
         exit;
     }
 
-    $sql = 'UPDATE aparelhos SET nome = :nome, potencia_watts = :potencia, horas_uso = :horas WHERE id = :aid';
+    $sql = 'UPDATE aparelhos SET nome = :nome, potencia_watts = :potencia, horas_uso = :horas, fator_uso = :fator WHERE id = :aid';
     $stmt = $pdo->prepare($sql);
-    $stmt->execute([':nome' => $nome, ':potencia' => $potencia, ':horas' => $horas, ':aid' => $aparelhoId]);
+    $stmt->execute([':nome' => $nome, ':potencia' => $potencia, ':horas' => $horas, ':fator' => $fator, ':aid' => $aparelhoId]);
     echo json_encode(['sucesso' => true, 'mensagem' => 'Aparelho atualizado']);
 } catch (PDOException $e) {
     http_response_code(500);

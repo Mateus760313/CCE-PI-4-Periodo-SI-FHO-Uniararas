@@ -31,9 +31,10 @@ try {
                     a.nome, 
                     a.potencia_watts, 
                     a.horas_uso, 
+                    a.fator_uso,
                     a.data_criacao,
-                    ((a.potencia_watts * a.horas_uso / 1000) * 30) as consumo_mensal_kwh,
-                    ((a.potencia_watts * a.horas_uso / 1000) * 30 * COALESCE(r.tarifa_kwh, 0)) as custo_mensal_reais
+                    ((a.potencia_watts * a.horas_uso * COALESCE(a.fator_uso, 1) / 1000) * 30) as consumo_mensal_kwh,
+                    ((a.potencia_watts * a.horas_uso * COALESCE(a.fator_uso, 1) / 1000) * 30 * COALESCE(r.tarifa_kwh, 0)) as custo_mensal_reais
                 FROM aparelhos a
                 JOIN residencias r ON r.id = a.residencia_id
                 WHERE a.comodo_id = :cid 
@@ -64,9 +65,10 @@ try {
                 a.nome, 
                 a.potencia_watts, 
                 a.horas_uso, 
+                a.fator_uso,
                 a.data_criacao,
-                ((a.potencia_watts * a.horas_uso / 1000) * 30) as consumo_mensal_kwh,
-                ((a.potencia_watts * a.horas_uso / 1000) * 30 * COALESCE(r.tarifa_kwh, 0)) as custo_mensal_reais
+                ((a.potencia_watts * a.horas_uso * COALESCE(a.fator_uso, 1) / 1000) * 30) as consumo_mensal_kwh,
+                ((a.potencia_watts * a.horas_uso * COALESCE(a.fator_uso, 1) / 1000) * 30 * COALESCE(r.tarifa_kwh, 0)) as custo_mensal_reais
             FROM aparelhos a
             JOIN residencias r ON r.id = a.residencia_id
             WHERE a.residencia_id = :rid 

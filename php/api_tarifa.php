@@ -27,7 +27,7 @@ $tarifas_cidades_especificas = [
 
 // Configuração da Bandeira Tarifária Atual (Isso poderia vir de um banco de dados administrativo)
 // verde, amarela, vermelha1, vermelha2, escassez
-$bandeira_atual = 'vermelha1'; 
+$bandeira_atual = 'amarela'; 
 
 $valores_bandeiras = [
     'verde' => 0.00,

@@ -21,6 +21,9 @@ try {
     error_log("Tentando conectar ao PostgreSQL: host=$host dbname=$dbname user=$user port=$port");
     $pdo = new PDO("pgsql:host=$host;port=$port;dbname=$dbname;user=$user;password=$password");
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    // Garante que a comunicação seja em UTF-8
+    $pdo->exec("SET NAMES 'UTF8'");
+    $pdo->exec("SET client_encoding='UTF8'");
     error_log("Conexão PostgreSQL estabelecida com sucesso");
 } catch (PDOException $e) {
     header('Content-Type: application/json');

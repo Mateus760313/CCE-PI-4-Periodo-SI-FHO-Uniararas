@@ -306,9 +306,9 @@
 
                 <div class="form-group">
                     <label>Bandeira Tarifária Vigente</label>
-                    <div style="padding: 12px 16px; background: #fee2e2; color: #991b1b; border-radius: 12px; border: 1px solid #fecaca; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+                    <div style="padding: 12px 16px; background: #fffbeb; color: #92400e; border-radius: 12px; border: 1px solid #fcd34d; font-weight: 600; display: flex; align-items: center; gap: 8px;">
                         <span>🚩</span>
-                        <span>Bandeira Vermelha P1 (+ R$ 4,46/100kWh)</span>
+                        <span>Bandeira Amarela: A tarifa sofre acréscimo de R$ 0,01885 para cada quilowatt-hora (kWh) consumidos;</span>
                     </div>
                     <!-- Campo oculto para manter compatibilidade se necessário, ou apenas removido -->
                 </div>
@@ -322,25 +322,35 @@
                 <div class="form-group">
                     <label>Escolha um tipo de residência *</label>
                     <div class="image-selector" id="imageSelector">
-                        <label class="image-option">
-                            <input type="radio" name="imagemResidencia" value="casa" required>
-                            <img src="https://img.icons8.com/fluency/96/home.png" alt="Casa Normal" title="Casa Normal">
+                        <label class="image-option" title="1 morador">
+                            <input type="radio" name="imagemResidencia" value="Casa_pequena_1_morador" required>
+                            <img src="https://img.icons8.com/fluency/96/home.png" alt="Casa Pequena">
+                            <span class="card-label">Casa Pequena</span>
                         </label>
-                        <label class="image-option">
-                            <input type="radio" name="imagemResidencia" value="apartamento">
-                            <img src="https://img.icons8.com/fluency/96/building.png" alt="Apartamento" title="Apartamento">
+                        <label class="image-option" title="3-4 moradores">
+                            <input type="radio" name="imagemResidencia" value="Casa_grande_3_4_moradores">
+                            <img src="https://img.icons8.com/fluency/96/cottage.png" alt="Casa Grande">
+                            <span class="card-label">Casa Grande</span>
                         </label>
-                        <label class="image-option">
-                            <input type="radio" name="imagemResidencia" value="sitio">
-                            <img src="https://img.icons8.com/fluency/96/cottage.png" alt="Casa Maior" title="Casa Maior">
+                        <label class="image-option" title="1 morador">
+                            <input type="radio" name="imagemResidencia" value="Apartamento_1_morador">
+                            <img src="https://img.icons8.com/fluency/96/building.png" alt="Apartamento">
+                            <span class="card-label">Apartamento</span>
                         </label>
-                        <label class="image-option">
-                            <input type="radio" name="imagemResidencia" value="comercial">
-                            <img src="https://img.icons8.com/fluency/96/shop.png" alt="Mini Comércio" title="Mini Comércio">
+                        <label class="image-option" title="2 moradores">
+                            <input type="radio" name="imagemResidencia" value="Apartamento_2_moradores">
+                            <img src="https://img.icons8.com/fluency/96/city-buildings.png" alt="Apartamento">
+                            <span class="card-label">Apartamento</span>
                         </label>
-                        <label class="image-option">
-                            <input type="radio" name="imagemResidencia" value="escritorio">
-                            <img src="https://img.icons8.com/fluency/96/office.png" alt="Escritório" title="Escritório">
+                        <label class="image-option" title="Comercial">
+                            <input type="radio" name="imagemResidencia" value="Mini_comercio">
+                            <img src="https://img.icons8.com/fluency/96/shop.png" alt="Mini Comércio">
+                            <span class="card-label">Comércio</span>
+                        </label>
+                        <label class="image-option" title="Escritório">
+                            <input type="radio" name="imagemResidencia" value="Pequeno_escritorio">
+                            <img src="https://img.icons8.com/fluency/96/office.png" alt="Escritório">
+                            <span class="card-label">Escritório</span>
                         </label>
                     </div>
                 </div>
@@ -380,14 +390,18 @@
             </div>
 
             <form id="formAparelho" onsubmit="cadastrarAparelho(event)">
-                <div class="form-group">
+                <div class="form-group" style="position: relative;">
                     <label for="nomeAparelho">Nome do Aparelho *</label>
-                    <input type="text" id="nomeAparelho" placeholder="Ex: Geladeira, TV, Ar Condicionado..." required>
+                    <input type="text" id="nomeAparelho" placeholder="Ex: Geladeira, TV, Ar Condicionado..." required autocomplete="off">
+                    <ul id="listaSugestoes" class="custom-dropdown"></ul>
                 </div>
 
                 <div class="form-group">
                     <label for="potenciaAparelho">Potência (Watts) *</label>
-                    <input type="number" id="potenciaAparelho" placeholder="Ex: 1500" required min="1">
+                    <input type="number" id="potenciaAparelho" placeholder="Ex: 1500" required min="0.1" step="0.1">
+                    <small style="color: var(--text-light); font-size: 0.8rem; display: block; margin-top: 4px;">
+                        <span id="potenciaHint">Digite o nome para sugerir a potência</span>
+                    </small>
                 </div>
 
                 <div class="form-group">

@@ -11,9 +11,9 @@ if (!$usuarioId) {
 
 try {
     // 1. Top 5 Aparelhos
-    // Calcula o consumo mensal em kWh: (potencia * horas * 30) / 1000
+    // Calcula o consumo mensal em kWh: (potencia * horas * fator_uso * 30) / 1000
     $sqlTop5 = "
-        SELECT nome, (potencia_watts * horas_uso * 30 / 1000) as consumo_kwh
+        SELECT nome, (potencia_watts * horas_uso * COALESCE(fator_uso, 1) * 30 / 1000) as consumo_kwh
         FROM aparelhos
         WHERE usuario_id = :uid
         ORDER BY consumo_kwh DESC
@@ -25,7 +25,7 @@ try {
 
     // 2. Consumo por Cômodo (Agrupado por nome para simplificar o gráfico global)
     $sqlComodos = "
-        SELECT c.nome, SUM(a.potencia_watts * a.horas_uso * 30 / 1000) as consumo_kwh
+        SELECT c.nome, SUM(a.potencia_watts * a.horas_uso * COALESCE(a.fator_uso, 1) * 30 / 1000) as consumo_kwh
         FROM aparelhos a
         JOIN comodos c ON a.comodo_id = c.id
         WHERE a.usuario_id = :uid

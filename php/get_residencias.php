@@ -18,8 +18,8 @@ try {
                 r.data_criacao, 
                 r.tarifa_kwh,
                 COUNT(a.id) as total_aparelhos,
-                COALESCE(SUM((a.potencia_watts * a.horas_uso / 1000) * 30), 0) as total_kwh_mensal,
-                COALESCE(SUM((a.potencia_watts * a.horas_uso / 1000) * 30 * COALESCE(r.tarifa_kwh, 0)), 0) as total_custo_mensal
+                COALESCE(SUM((a.potencia_watts * a.horas_uso * COALESCE(a.fator_uso, 1) / 1000) * 30), 0) as total_kwh_mensal,
+                COALESCE(SUM((a.potencia_watts * a.horas_uso * COALESCE(a.fator_uso, 1) / 1000) * 30 * COALESCE(r.tarifa_kwh, 0)), 0) as total_custo_mensal
             FROM residencias r
             LEFT JOIN aparelhos a ON a.residencia_id = r.id
             WHERE r.usuario_id = :usuario_id

@@ -165,8 +165,8 @@ function obterResumoGeral($pdo, $usuarioId, $residenciaId) {
     $sql = "SELECT 
                 COUNT(DISTINCT a.id) as total_aparelhos,
                 COUNT(DISTINCT a.residencia_id) as total_residencias,
-                COALESCE(SUM(a.potencia_watts * a.horas_uso * :dias / 1000), 0) as consumo_kwh_parcial,
-                COALESCE(SUM(a.potencia_watts * a.horas_uso * 30 / 1000), 0) as consumo_kwh_projetado
+                COALESCE(SUM(a.potencia_watts * a.horas_uso * COALESCE(a.fator_uso, 1) * :dias / 1000), 0) as consumo_kwh_parcial,
+                COALESCE(SUM(a.potencia_watts * a.horas_uso * COALESCE(a.fator_uso, 1) * 30 / 1000), 0) as consumo_kwh_projetado
             FROM aparelhos a
             WHERE a.usuario_id = :uid $whereResidencia";
     
@@ -227,8 +227,14 @@ function analisarMeta($pdo, $usuarioId, $residenciaId, $resumo) {
     $custoAtual = $resumo['custo_atual'];
     $custoProjetado = $resumo['custo_projetado'];
     
-    $percentualAtual = ($custoAtual / $valorMeta) * 100;
-    $percentualProjetado = ($custoProjetado / $valorMeta) * 100;
+    if ($valorMeta > 0) {
+        $percentualAtual = ($custoAtual / $valorMeta) * 100;
+        $percentualProjetado = ($custoProjetado / $valorMeta) * 100;
+    } else {
+        $percentualAtual = 0;
+        $percentualProjetado = 0;
+    }
+    
     $diferencaAtual = $custoAtual - $valorMeta;
     $diferencaProjetada = $custoProjetado - $valorMeta;
     
@@ -265,6 +271,14 @@ function analisarMeta($pdo, $usuarioId, $residenciaId, $resumo) {
             " Se o consumo continuar nesse ritmo, você deve ultrapassar a meta em cerca de R$ %.2f.",
             $diferencaProjetada
         );
+
+        if ($diasPassados > 0 && $custoAtual > 0) {
+            $mediaDiaria = $custoAtual / $diasPassados;
+            $diasParaEstouro = ($valorMeta - $custoAtual) / $mediaDiaria;
+            $diasParaEstouro = ceil($diasParaEstouro);
+            
+            $mensagem .= sprintf(" Estimamos que você ultrapassará a meta em %d dias.", $diasParaEstouro);
+       }
     } elseif ($status === 'excedido') {
         $mensagem .= sprintf(
             " Você já ultrapassou sua meta em R$ %.2f.",
@@ -303,8 +317,8 @@ function obterTopAparelhos($pdo, $usuarioId, $residenciaId, $limite = 10) {
                 c.nome as comodo_nome,
                 r.nome as residencia_nome,
                 r.tarifa_kwh,
-                (a.potencia_watts * a.horas_uso * 30 / 1000) as consumo_kwh_mes,
-                (a.potencia_watts * a.horas_uso * 30 / 1000 * COALESCE(r.tarifa_kwh, 0.75)) as custo_mes
+                (a.potencia_watts * a.horas_uso * COALESCE(a.fator_uso, 1) * 30 / 1000) as consumo_kwh_mes,
+                (a.potencia_watts * a.horas_uso * COALESCE(a.fator_uso, 1) * 30 / 1000 * COALESCE(r.tarifa_kwh, 0.75)) as custo_mes
             FROM aparelhos a
             LEFT JOIN comodos c ON a.comodo_id = c.id
             LEFT JOIN residencias r ON a.residencia_id = r.id
@@ -381,8 +395,8 @@ function obterConsumoPorComodo($pdo, $usuarioId, $residenciaId) {
     $sql = "SELECT 
                 c.id, c.nome,
                 COUNT(a.id) as qtd_aparelhos,
-                SUM(a.potencia_watts * a.horas_uso * 30 / 1000) as consumo_kwh_mes,
-                SUM(a.potencia_watts * a.horas_uso * 30 / 1000 * COALESCE(r.tarifa_kwh, 0.75)) as custo_mes
+                SUM(a.potencia_watts * a.horas_uso * COALESCE(a.fator_uso, 1) * 30 / 1000) as consumo_kwh_mes,
+                SUM(a.potencia_watts * a.horas_uso * COALESCE(a.fator_uso, 1) * 30 / 1000 * COALESCE(r.tarifa_kwh, 0.75)) as custo_mes
             FROM comodos c
             LEFT JOIN aparelhos a ON a.comodo_id = c.id
             LEFT JOIN residencias r ON c.residencia_id = r.id
@@ -802,8 +816,8 @@ function registrarConsumoDiario($pdo, $usuarioId) {
                 a.residencia_id,
                 a.id,
                 CURRENT_DATE,
-                (a.potencia_watts * a.horas_uso / 1000),
-                (a.potencia_watts * a.horas_uso / 1000 * COALESCE(r.tarifa_kwh, 0.75)),
+                (a.potencia_watts * a.horas_uso * COALESCE(a.fator_uso, 1) / 1000),
+                (a.potencia_watts * a.horas_uso * COALESCE(a.fator_uso, 1) / 1000 * COALESCE(r.tarifa_kwh, 0.75)),
                 COALESCE(r.tarifa_kwh, 0.75)
             FROM aparelhos a
             JOIN residencias r ON a.residencia_id = r.id

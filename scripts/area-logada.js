@@ -12,6 +12,8 @@ let aparelhos = [];
 let comodos = []; 
 // [NOVO] Guarda o cômodo selecionado
 let comodoAtual = null; 
+// [NOVO] Guarda sugestões de aparelhos
+let sugestoesAparelhos = [];
 
 
 // ========== INICIALIZAÇÃO E LISTENERS ==========
@@ -46,6 +48,7 @@ document.addEventListener('DOMContentLoaded', function() {
     setupUserDropdown(); // Configura o menu dropdown do usuário
     setupTimeSelector(); // Configura os botões de tempo
     initCharts(); // Inicializa os gráficos
+    carregarSugestoesAparelhos(); // Carrega sugestões de aparelhos
 });
 
 function setupUserDropdown() {
@@ -379,7 +382,14 @@ function getImagemUrl(tipo) {
         'apartamento': 'https://img.icons8.com/fluency/96/building.png',
         'sitio': 'https://img.icons8.com/fluency/96/cottage.png',
         'comercial': 'https://img.icons8.com/fluency/96/shop.png',
-        'escritorio': 'https://img.icons8.com/fluency/96/office.png'
+        'escritorio': 'https://img.icons8.com/fluency/96/office.png',
+        // Novos tipos
+        'Casa_pequena_1_morador': 'https://img.icons8.com/fluency/96/home.png',
+        'Casa_grande_3_4_moradores': 'https://img.icons8.com/fluency/96/cottage.png',
+        'Apartamento_1_morador': 'https://img.icons8.com/fluency/96/building.png',
+        'Apartamento_2_moradores': 'https://img.icons8.com/fluency/96/city-buildings.png',
+        'Mini_comercio': 'https://img.icons8.com/fluency/96/shop.png',
+        'Pequeno_escritorio': 'https://img.icons8.com/fluency/96/office.png'
     };
     return imagens[tipo] || imagens['casa'];
 }
@@ -1814,4 +1824,98 @@ function getConfigComparacao(primaryColor, dangerColor, dados) {
             }
         }
     };
+}
+
+// ========== SUGESTÕES DE APARELHOS ==========
+function carregarSugestoesAparelhos() {
+    fetch('php/get_sugestoes_aparelhos.php', {
+        method: 'GET',
+        credentials: 'include'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.sucesso) {
+            sugestoesAparelhos = data.sugestoes;
+            preencherDatalistSugestoes();
+            setupSugestaoListener();
+        }
+    })
+    .catch(error => console.error('Erro ao carregar sugestões:', error));
+}
+
+function preencherDatalistSugestoes() {
+    // Função mantida vazia pois agora usamos lista customizada
+}
+
+function setupSugestaoListener() {
+    const inputNome = document.getElementById('nomeAparelho');
+    const inputPotencia = document.getElementById('potenciaAparelho');
+    const listaSugestoes = document.getElementById('listaSugestoes');
+    const hint = document.getElementById('potenciaHint');
+    
+    if (!inputNome || !inputPotencia || !listaSugestoes) return;
+    
+    // Função para fechar a lista
+    const fecharLista = () => {
+        listaSugestoes.classList.remove('active');
+        listaSugestoes.style.display = 'none';
+    };
+
+    // Listener de input para filtrar e mostrar sugestões
+    inputNome.addEventListener('input', function() {
+        const valorOriginal = this.value;
+        // Normaliza: minúsculas, sem acentos, hífen vira espaço
+        const valorNormalizado = valorOriginal.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, "").replace(/-/g, " ");
+        
+        listaSugestoes.innerHTML = '';
+        
+        if (valorOriginal.length === 0) {
+            fecharLista();
+            return;
+        }
+
+        const matches = sugestoesAparelhos.filter(item => {
+            // Normaliza item: minúsculas, sem acentos, hífen vira espaço
+            const nomeNormalizado = item.nome_aparelho.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, "").replace(/-/g, " ");
+            return nomeNormalizado.includes(valorNormalizado);
+        });
+
+        if (matches.length > 0) {
+            matches.forEach(item => {
+                const li = document.createElement('li');
+                li.innerHTML = `${item.nome_aparelho} <span class="wattage">${item.potencia_media_watts}W</span>`;
+                li.onclick = () => {
+                    inputNome.value = item.nome_aparelho;
+                    inputPotencia.value = item.potencia_media_watts;
+                    
+                    // Feedback visual
+                    if (hint) {
+                        hint.textContent = `Potência sugerida: ${item.potencia_media_watts}W`;
+                        hint.style.color = 'var(--primary-color)';
+                        hint.style.fontWeight = '600';
+                    }
+                    inputPotencia.style.borderColor = 'var(--primary-color)';
+                    inputPotencia.style.backgroundColor = 'rgba(16, 185, 129, 0.05)';
+                    setTimeout(() => {
+                        inputPotencia.style.borderColor = '';
+                        inputPotencia.style.backgroundColor = '';
+                    }, 1500);
+
+                    fecharLista();
+                };
+                listaSugestoes.appendChild(li);
+            });
+            listaSugestoes.style.display = 'block';
+            listaSugestoes.classList.add('active');
+        } else {
+            fecharLista();
+        }
+    });
+
+    // Fechar ao clicar fora
+    document.addEventListener('click', function(e) {
+        if (e.target !== inputNome && !listaSugestoes.contains(e.target)) {
+            fecharLista();
+        }
+    });
 }

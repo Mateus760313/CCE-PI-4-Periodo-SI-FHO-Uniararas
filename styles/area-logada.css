@@ -619,7 +619,7 @@ body {
     border: 1px solid var(--card-border);
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    overflow: visible;
     position: relative;
 }
 
@@ -633,9 +633,9 @@ body {
     background: linear-gradient(90deg, var(--primary-color), var(--primary-light), var(--primary-color));
     background-size: 200% 100%;
     animation: shimmer 3s infinite;
+    border-radius: 24px 24px 0 0;
 }
 
-/* Chart Header */
 .chart-header {
     display: flex;
     justify-content: space-between;
@@ -645,6 +645,7 @@ body {
     gap: 20px;
     border-bottom: 1px solid var(--card-border);
     background: linear-gradient(180deg, var(--card-bg) 0%, transparent 100%);
+    border-radius: 24px 24px 0 0;
 }
 
 .chart-title-section {
@@ -864,11 +865,16 @@ body {
     background: linear-gradient(180deg, transparent 0%, rgba(251, 191, 36, 0.02) 100%);
 }
 
-/* Chart Footer */
 .chart-footer {
     padding: 16px 28px 20px;
     border-top: 1px solid var(--card-border);
     background: var(--input-bg);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    border-radius: 0 0 24px 24px;
 }
 
 .chart-insight {
@@ -879,6 +885,8 @@ body {
     background: var(--card-bg);
     border-radius: 12px;
     border-left: 4px solid var(--primary-color);
+    flex: 1;
+    min-width: 250px;
 }
 
 .insight-icon {
@@ -2473,4 +2481,68 @@ body {
 [data-theme="dark"] .custom-dropdown li:hover {
     background-color: rgba(251, 191, 36, 0.1);
     color: var(--primary-color);
+}
+/* ========== CHART UNIT TOGGLE ========== */
+.chart-unit-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+}
+
+.chart-unit-toggle .unit-label {
+    font-size: 0.85rem;
+    color: var(--text-light);
+    font-weight: 500;
+}
+
+.unit-toggle-switch {
+    display: flex;
+    background: var(--input-bg);
+    padding: 3px;
+    border-radius: 20px;
+    border: 1px solid var(--input-border);
+    gap: 2px;
+}
+
+.unit-btn {
+    padding: 6px 14px;
+    border: none;
+    background: transparent;
+    color: var(--text-light);
+    font-weight: 600;
+    font-size: 0.8rem;
+    cursor: pointer;
+    border-radius: 16px;
+    transition: all 0.25s ease;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.unit-btn:hover {
+    color: var(--text-color);
+}
+
+.unit-btn.active {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    color: white;
+    box-shadow: 0 2px 8px var(--primary-glow);
+}
+
+[data-theme="dark"] .unit-btn.active {
+    color: #0a0a0a;
+}
+
+/* Responsividade para o toggle de unidade */
+@media (max-width: 600px) {
+    .chart-footer {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .chart-unit-toggle {
+        justify-content: center;
+        margin-left: 0;
+    }
 }

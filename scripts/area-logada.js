@@ -47,6 +47,16 @@ document.addEventListener('DOMContentLoaded', function() {
     setupModalCloseOnOutsideClick();
     setupUserDropdown(); // Configura o menu dropdown do usuário
     setupTimeSelector(); // Configura os botões de tempo
+    
+    // Registra o plugin de DataLabels se estiver carregado
+    if (typeof ChartDataLabels !== 'undefined') {
+        Chart.register(ChartDataLabels);
+        // Desabilita por padrão para não poluir todos os gráficos
+        Chart.defaults.set('plugins.datalabels', {
+            display: false
+        });
+    }
+
     initCharts(); // Inicializa os gráficos
     carregarSugestoesAparelhos(); // Carrega sugestões de aparelhos
 });
@@ -1286,6 +1296,31 @@ function setupModalCloseOnOutsideClick() {
 let chartInstance = null;
 let dashboardData = null; // Armazena os dados reais do dashboard
 let currentChartType = 'mensal'; // Armazena o tipo de gráfico atual
+let currentUnit = 'BRL'; // Unidade atual do gráfico ('BRL' ou 'kWh')
+
+// Função para alternar a unidade do gráfico
+function mudarUnidadeGrafico(unit) {
+    if (unit !== 'BRL' && unit !== 'kWh') return;
+    
+    currentUnit = unit;
+    
+    // Atualiza botões
+    document.querySelectorAll('.unit-btn').forEach(btn => {
+        btn.classList.remove('active');
+        // Verifica o texto ou algum atributo para saber qual é qual
+        if (btn.getAttribute('onclick').includes(`'${unit}'`)) {
+            btn.classList.add('active');
+        }
+    });
+    
+    // Atualiza o gráfico atual
+    if (chartInstance) {
+        // Usa o elemento ativo da aba de gráficos para manter o contexto
+        const activeTab = document.querySelector('.chart-tab.active') || 
+                          document.querySelector('.chart-extra-btn.active');
+        mudarGrafico(currentChartType, activeTab);
+    }
+}
 
 // Função para obter a cor primária correta baseada no tema atual
 function getThemeColor() {
@@ -1393,14 +1428,14 @@ function mudarGrafico(tipo, element) {
         case 'mensal':
             config = getConfigConsumoMensal(primaryColor, dados);
             subtitle = 'Evolução mensal do consumo de energia';
-            insight = '💡 Seu consumo estimado atual é de ' + (dados ? parseFloat(dados.total_mensal).toFixed(1) : '0') + ' kWh/mês.';
+            insight = '💡 Seu consumo estimado atual é de ' + (dados ? parseFloat(dados.total_mensal).toFixed(1) : '0') + ' kWh/mês (R$ ' + (dados ? parseFloat(dados.total_custo).toFixed(2).replace('.', ',') : '0,00') + ').';
             break;
         case 'top5':
             config = getConfigTop5Aparelhos(primaryColor, dados);
             subtitle = 'Aparelhos com maior consumo de energia';
             if (dados && dados.top5 && dados.top5.length > 0) {
                 const top1 = dados.top5[0];
-                insight = `⚡ O aparelho <strong>${top1.nome}</strong> é o maior consumidor (${parseFloat(top1.consumo_kwh).toFixed(1)} kWh).`;
+                insight = `⚡ O aparelho <strong>${top1.nome}</strong> é o maior consumidor (${parseFloat(top1.consumo_kwh).toFixed(1)} kWh - R$ ${parseFloat(top1.custo_estimado).toFixed(2).replace('.', ',')}).`;
             } else {
                 insight = '⚡ Cadastre seus aparelhos para ver o ranking de consumo.';
             }
@@ -1410,7 +1445,7 @@ function mudarGrafico(tipo, element) {
             subtitle = 'Distribuição do consumo por cômodo';
             if (dados && dados.comodos && dados.comodos.length > 0) {
                 const topComodo = dados.comodos[0];
-                insight = `🏠 O cômodo <strong>${topComodo.nome}</strong> consome mais energia (${parseFloat(topComodo.consumo_kwh).toFixed(1)} kWh).`;
+                insight = `🏠 O cômodo <strong>${topComodo.nome}</strong> consome mais energia (${parseFloat(topComodo.consumo_kwh).toFixed(1)} kWh - R$ ${parseFloat(topComodo.custo_estimado).toFixed(2).replace('.', ',')}).`;
             } else {
                 insight = '🏠 Cadastre cômodos e aparelhos para ver a distribuição.';
             }
@@ -1444,24 +1479,52 @@ function mudarGrafico(tipo, element) {
 
 // 1. Gráfico de Consumo Mensal (Line)
 function getConfigConsumoMensal(primaryColor, dados) {
-    // Como não temos histórico real no BD, vamos simular um histórico
-    // onde o mês atual é o valor real calculado.
+    const atualKWh = dados ? parseFloat(dados.total_mensal) : 0;
+    const atualReais = dados ? parseFloat(dados.total_custo) : 0;
+    const hasHistory = dados ? dados.has_history : false;
     
-    const atual = dados ? parseFloat(dados.total_mensal) : 0;
-    // Simula meses anteriores com variação aleatória pequena
-    const m1 = Math.max(0, atual * 0.9);
-    const m2 = Math.max(0, atual * 1.1);
-    const m3 = Math.max(0, atual * 0.95);
-    const m4 = Math.max(0, atual * 1.05);
-    const m5 = Math.max(0, atual * 0.98);
+    // Calcula tarifa média implícita para projetar custos passados
+    const tarifaMedia = atualKWh > 0 ? (atualReais / atualKWh) : 0;
+
+    const isBRL = currentUnit === 'BRL';
+    const labelMain = isBRL ? 'Custo (R$)' : 'Consumo (kWh)';
+    const yAxisTitle = isBRL ? 'Reais (R$)' : 'kWh';
+
+    const mesesNomes = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+    const hoje = new Date();
+    let labels = [];
+    let dataMain = [];
+
+    if (!hasHistory) {
+        // Novo usuário: Mostra apenas o mês atual
+        labels = [mesesNomes[hoje.getMonth()]];
+        const val = isBRL ? atualReais : atualKWh;
+        dataMain = [val];
+    } else {
+        // Simula meses anteriores com variação aleatória pequena (apenas se tiver histórico)
+        const factors = [0.9, 1.1, 0.95, 1.05, 0.98, 1.0];
+        
+        // Gera dados em kWh
+        const dataKWh = factors.map(f => atualKWh * f);
+        // Gera dados em Reais
+        const dataReais = dataKWh.map(v => v * tarifaMedia);
+        
+        dataMain = isBRL ? dataReais : dataKWh;
+        
+        // Gera os últimos 5 meses + mês atual
+        for (let i = 5; i >= 0; i--) {
+            const d = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
+            labels.push(mesesNomes[d.getMonth()]);
+        }
+    }
 
     return {
         type: 'line',
         data: {
-            labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Atual'],
+            labels: labels,
             datasets: [{
-                label: 'Consumo (kWh)',
-                data: [m1, m2, m3, m4, m5, atual], 
+                label: labelMain,
+                data: dataMain, 
                 borderColor: primaryColor,
                 backgroundColor: createGradient(primaryColor),
                 tension: 0.4,
@@ -1499,13 +1562,30 @@ function getConfigConsumoMensal(primaryColor, dados) {
                     padding: 14,
                     cornerRadius: 10,
                     displayColors: true,
-                    boxPadding: 6
+                    boxPadding: 6,
+                    callbacks: {
+                        label: function(context) {
+                            const val = parseFloat(context.raw);
+                            let primary, secondary;
+                            
+                            if (isBRL) {
+                                primary = `R$ ${val.toFixed(2).replace('.', ',')}`;
+                                const secVal = tarifaMedia > 0 ? val / tarifaMedia : 0;
+                                secondary = `${secVal.toFixed(1)} kWh`;
+                            } else {
+                                primary = `${val.toFixed(1)} kWh`;
+                                const secVal = val * tarifaMedia;
+                                secondary = `R$ ${secVal.toFixed(2).replace('.', ',')}`;
+                            }
+                            return `${primary} (${secondary})`;
+                        }
+                    }
                 }
             },
             scales: {
                 y: { 
                     beginAtZero: true, 
-                    title: { display: true, text: 'kWh', font: { weight: '600' } },
+                    title: { display: true, text: yAxisTitle, font: { weight: '600' } },
                     grid: { color: 'rgba(0,0,0,0.05)' }
                 },
                 x: {
@@ -1530,23 +1610,38 @@ function createGradient(color) {
 // 2. Gráfico Top 5 Aparelhos (Bar Horizontal)
 function getConfigTop5Aparelhos(primaryColor, dados) {
     let labels = [];
-    let values = [];
+    let valuesKWh = [];
+    let valuesReais = [];
 
     if (dados && dados.top5 && dados.top5.length > 0) {
-        labels = dados.top5.map(item => item.nome);
-        values = dados.top5.map(item => parseFloat(item.consumo_kwh));
+        // [ALTERADO] Labels agora são arrays para permitir múltiplas linhas (Nome + Cômodo)
+        labels = dados.top5.map(item => {
+            const comodo = item.comodo_nome ? `(${item.comodo_nome})` : '';
+            return [item.nome, comodo];
+        });
+        valuesKWh = dados.top5.map(item => parseFloat(item.consumo_kwh));
+        valuesReais = dados.top5.map(item => parseFloat(item.custo_estimado));
     } else {
         labels = ['Sem dados'];
-        values = [0];
+        valuesKWh = [0];
+        valuesReais = [0];
     }
+
+    const isBRL = currentUnit === 'BRL';
+    const dataMain = isBRL ? valuesReais : valuesKWh;
+    const dataSecondary = isBRL ? valuesKWh : valuesReais;
+    const labelMain = isBRL ? 'Custo (R$)' : 'Consumo (kWh)';
+    const xAxisTitle = isBRL ? 'Reais (R$)' : 'kWh';
 
     return {
         type: 'bar',
         data: {
             labels: labels,
             datasets: [{
-                label: 'Consumo (kWh)',
-                data: values,
+                label: labelMain,
+                data: dataMain,
+                // Passamos os valores secundários como propriedade customizada
+                secondaryData: dataSecondary,
                 backgroundColor: [
                     '#10b981',
                     '#3b82f6',
@@ -1563,8 +1658,32 @@ function getConfigTop5Aparelhos(primaryColor, dados) {
             indexAxis: 'y', // Barra horizontal
             responsive: true,
             maintainAspectRatio: false,
+            layout: {
+                padding: {
+                    right: 80
+                }
+            },
             plugins: {
                 legend: { display: false },
+                datalabels: {
+                    display: true,
+                    anchor: 'end',
+                    align: 'end',
+                    formatter: function(value, context) {
+                        if (isBRL) {
+                            return 'R$ ' + value.toFixed(2).replace('.', ',');
+                        } else {
+                            return value.toFixed(1) + ' kWh';
+                        }
+                    },
+                    color: function(context) {
+                        return document.documentElement.getAttribute('data-theme') === 'dark' ? '#cbd5e1' : '#475569';
+                    },
+                    font: {
+                        weight: 'bold',
+                        size: 11
+                    }
+                },
                 tooltip: {
                     backgroundColor: 'rgba(30, 41, 59, 0.95)',
                     titleFont: { size: 14, weight: '700' },
@@ -1576,7 +1695,14 @@ function getConfigTop5Aparelhos(primaryColor, dados) {
                             const total = context.dataset.data.reduce((a, b) => a + b, 0);
                             const val = context.raw || 0;
                             const percent = total > 0 ? ((val / total) * 100).toFixed(1) : 0;
-                            return `${val.toFixed(2)} kWh (${percent}%)`;
+                            
+                            const secVal = context.dataset.secondaryData[context.dataIndex] || 0;
+                            
+                            if (isBRL) {
+                                return `R$ ${val.toFixed(2).replace('.', ',')} (${percent}%) - ${secVal.toFixed(1)} kWh`;
+                            } else {
+                                return `${val.toFixed(1)} kWh (${percent}%) - R$ ${secVal.toFixed(2).replace('.', ',')}`;
+                            }
                         }
                     }
                 }
@@ -1584,7 +1710,7 @@ function getConfigTop5Aparelhos(primaryColor, dados) {
             scales: {
                 x: {
                     grid: { color: 'rgba(0,0,0,0.05)' },
-                    title: { display: true, text: 'kWh', font: { weight: '600' } }
+                    title: { display: true, text: xAxisTitle, font: { weight: '600' } }
                 },
                 y: {
                     grid: { display: false },
@@ -1598,15 +1724,22 @@ function getConfigTop5Aparelhos(primaryColor, dados) {
 // 3. Gráfico por Cômodo (Doughnut)
 function getConfigConsumoComodos(dados) {
     let labels = [];
-    let values = [];
+    let valuesKWh = [];
+    let valuesReais = [];
 
     if (dados && dados.comodos && dados.comodos.length > 0) {
         labels = dados.comodos.map(item => item.nome);
-        values = dados.comodos.map(item => parseFloat(item.consumo_kwh));
+        valuesKWh = dados.comodos.map(item => parseFloat(item.consumo_kwh));
+        valuesReais = dados.comodos.map(item => parseFloat(item.custo_estimado));
     } else {
         labels = ['Sem dados'];
-        values = [1]; // Valor dummy para aparecer algo vazio
+        valuesKWh = [1]; // Valor dummy para aparecer algo vazio
+        valuesReais = [1];
     }
+
+    const isBRL = currentUnit === 'BRL';
+    const dataMain = isBRL ? valuesReais : valuesKWh;
+    const dataSecondary = isBRL ? valuesKWh : valuesReais;
 
     // Cor da legenda baseada no tema atual
     const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
@@ -1617,7 +1750,8 @@ function getConfigConsumoComodos(dados) {
         data: {
             labels: labels,
             datasets: [{
-                data: values,
+                data: dataMain,
+                secondaryData: dataSecondary,
                 backgroundColor: [
                     '#10b981', // Primary
                     '#3b82f6', // Blue
@@ -1634,6 +1768,26 @@ function getConfigConsumoComodos(dados) {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
+                datalabels: {
+                    display: true,
+                    color: '#fff',
+                    font: {
+                        weight: 'bold',
+                        size: 11
+                    },
+                    formatter: function(value, context) {
+                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                        if (total === 0) return '';
+                        const percent = (value / total);
+                        if (percent < 0.08) return ''; // Esconde se for menor que 8% para não encavalar
+                        
+                        if (isBRL) {
+                            return 'R$ ' + value.toFixed(0);
+                        } else {
+                            return value.toFixed(0) + ' kWh';
+                        }
+                    }
+                },
                 legend: { 
                     position: 'right',
                     labels: {
@@ -1665,7 +1819,23 @@ function getConfigConsumoComodos(dados) {
                     titleFont: { size: 14, weight: '700' },
                     bodyFont: { size: 13 },
                     padding: 14,
-                    cornerRadius: 10
+                    cornerRadius: 10,
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const val = context.raw || 0;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percent = total > 0 ? ((val / total) * 100).toFixed(1) : 0;
+                            
+                            const secVal = context.dataset.secondaryData[context.dataIndex] || 0;
+                            
+                            if (isBRL) {
+                                return `${label}: R$ ${val.toFixed(2).replace('.', ',')} (${percent}%) - ${secVal.toFixed(1)} kWh`;
+                            } else {
+                                return `${label}: ${val.toFixed(2)} kWh (${percent}%) - R$ ${secVal.toFixed(2).replace('.', ',')}`;
+                            }
+                        }
+                    }
                 }
             },
             cutout: '65%',
@@ -1677,42 +1847,54 @@ function getConfigConsumoComodos(dados) {
 // 4. Gráfico de Projeção (Line)
 function getConfigProjecao(primaryColor, dangerColor, dados) {
     // Simulação baseada no total mensal atual
-    const totalAtual = dados ? parseFloat(dados.total_mensal) : 0;
-    const diasNoMes = 30;
-    const consumoDiario = totalAtual / diasNoMes;
+    const totalAtualKWh = dados ? parseFloat(dados.total_mensal) : 0;
+    const totalAtualReais = dados ? parseFloat(dados.total_custo) : 0;
+    const tarifaMedia = totalAtualKWh > 0 ? (totalAtualReais / totalAtualKWh) : 0;
     
-    // Gera dados para 30 dias
-    const dias = Array.from({length: 30}, (_, i) => i + 1);
-    const consumoAcumulado = [];
-    let acumulado = 0;
+    // [CORREÇÃO] Usar data real
+    const hoje = new Date();
+    const diaAtual = hoje.getDate();
+    const ultimoDiaMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0).getDate();
     
-    // Simula que estamos no dia 20
-    const diaAtual = 20;
+    const consumoDiarioKWh = diaAtual > 0 ? (totalAtualKWh / diaAtual) : 0;
     
-    for (let i = 0; i < diaAtual; i++) {
-        // Variação aleatória diária
-        const variacao = (Math.random() * 0.4) + 0.8; // 0.8 a 1.2
-        acumulado += consumoDiario * variacao;
-        consumoAcumulado.push(acumulado);
+    // Gera dados para todos os dias do mês
+    const dias = Array.from({length: ultimoDiaMes}, (_, i) => i + 1);
+    const consumoAcumuladoKWh = [];
+    let acumuladoKWh = 0;
+    
+    for (let i = 1; i <= diaAtual; i++) {
+        const valorDia = totalAtualKWh / diaAtual; 
+        acumuladoKWh += valorDia;
+        consumoAcumuladoKWh.push(acumuladoKWh);
     }
 
-    // Projeção linear para o resto
-    const projecao = [...consumoAcumulado];
-    let projecaoAcumulada = acumulado;
-    for (let i = diaAtual; i < 30; i++) {
-        projecaoAcumulada += consumoDiario;
-        projecao.push(projecaoAcumulada);
+    // Projeção linear para o resto do mês
+    const projecaoKWh = [...consumoAcumuladoKWh];
+    let projecaoAcumuladaKWh = acumuladoKWh;
+    
+    for (let i = diaAtual + 1; i <= ultimoDiaMes; i++) {
+        projecaoAcumuladaKWh += consumoDiarioKWh;
+        projecaoKWh.push(projecaoAcumuladaKWh);
     }
 
-    // Preenche array real com nulls
-    const consumoRealCompleto = [...consumoAcumulado, ...Array(30 - diaAtual).fill(null)];
+    // Preenche array real com nulls para o futuro
+    const consumoRealCompletoKWh = [...consumoAcumuladoKWh, ...Array(ultimoDiaMes - diaAtual).fill(null)];
+
+    // Converte para Reais se necessário
+    const isBRL = currentUnit === 'BRL';
+    const consumoRealCompleto = isBRL ? consumoRealCompletoKWh.map(v => v !== null ? v * tarifaMedia : null) : consumoRealCompletoKWh;
+    const projecao = isBRL ? projecaoKWh.map(v => v * tarifaMedia) : projecaoKWh;
+    
+    const labelReal = isBRL ? 'Custo Real (Estimado)' : 'Consumo Real (Estimado)';
+    const yAxisTitle = isBRL ? 'Reais (R$) Acumulado' : 'kWh Acumulado';
 
     return {
         type: 'line',
         data: {
             labels: dias,
             datasets: [{
-                label: 'Consumo Real (Simulado)',
+                label: labelReal,
                 data: consumoRealCompleto,
                 borderColor: primaryColor,
                 backgroundColor: primaryColor,
@@ -1746,13 +1928,30 @@ function getConfigProjecao(primaryColor, dangerColor, dados) {
                 tooltip: {
                     backgroundColor: 'rgba(30, 41, 59, 0.95)',
                     padding: 14,
-                    cornerRadius: 10
+                    cornerRadius: 10,
+                    callbacks: {
+                        label: function(context) {
+                            const val = parseFloat(context.raw);
+                            let primary, secondary;
+                            
+                            if (isBRL) {
+                                primary = `R$ ${val.toFixed(2).replace('.', ',')}`;
+                                const secVal = tarifaMedia > 0 ? val / tarifaMedia : 0;
+                                secondary = `${secVal.toFixed(1)} kWh`;
+                            } else {
+                                primary = `${val.toFixed(1)} kWh`;
+                                const secVal = val * tarifaMedia;
+                                secondary = `R$ ${secVal.toFixed(2).replace('.', ',')}`;
+                            }
+                            return `${context.dataset.label}: ${primary} (${secondary})`;
+                        }
+                    }
                 }
             },
             scales: {
                 y: {
                     grid: { color: 'rgba(0,0,0,0.05)' },
-                    title: { display: true, text: 'kWh Acumulado', font: { weight: '600' } }
+                    title: { display: true, text: yAxisTitle, font: { weight: '600' } }
                 },
                 x: {
                     grid: { display: false },
@@ -1765,21 +1964,80 @@ function getConfigProjecao(primaryColor, dangerColor, dados) {
 
 // 5. Comparação Mês Anterior (Bar)
 function getConfigComparacao(primaryColor, dangerColor, dados) {
-    const atual = dados ? parseFloat(dados.total_mensal) : 0;
+    const atualKWh = dados ? parseFloat(dados.total_mensal) : 0;
+    const atualReais = dados ? parseFloat(dados.total_custo) : 0;
+    const hasHistory = dados ? dados.has_history : false;
+    const tarifaMedia = atualKWh > 0 ? (atualReais / atualKWh) : 0;
+
+    const isBRL = currentUnit === 'BRL';
+    const labelMain = isBRL ? 'Custo Total (R$)' : 'Consumo Total (kWh)';
+    const yAxisTitle = isBRL ? 'Reais (R$)' : 'kWh';
+
+    if (!hasHistory) {
+        // Novo usuário: Mostra apenas mês atual e mensagem
+        return {
+            type: 'bar',
+            data: {
+                labels: ['Mês Atual'],
+                datasets: [{
+                    label: labelMain,
+                    data: isBRL ? [atualReais] : [atualKWh],
+                    backgroundColor: [primaryColor],
+                    borderRadius: 12,
+                    barThickness: 80,
+                    borderSkipped: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    title: {
+                        display: true,
+                        text: 'Sem dados anteriores para comparação',
+                        font: { size: 16, weight: 'normal' },
+                        padding: { top: 20, bottom: 20 }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const val = parseFloat(context.raw);
+                                return isBRL ? `R$ ${val.toFixed(2).replace('.', ',')}` : `${val.toFixed(1)} kWh`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: { 
+                        beginAtZero: true, 
+                        title: { display: true, text: yAxisTitle }
+                    },
+                    x: { grid: { display: false } }
+                }
+            }
+        };
+    }
+
     // Simula mês anterior sendo 10% menor ou maior
-    const anterior = atual * 0.9; 
+    const anteriorKWh = atualKWh * 0.9; 
+    const anteriorReais = anteriorKWh * tarifaMedia;
     
-    const aumentou = atual > anterior;
-    const diferenca = Math.abs(atual - anterior);
-    const percentual = anterior > 0 ? ((diferenca / anterior) * 100).toFixed(1) : 0;
+    const aumentou = atualKWh > anteriorKWh;
+    const diferenca = Math.abs(atualKWh - anteriorKWh);
+    const percentual = anteriorKWh > 0 ? ((diferenca / anteriorKWh) * 100).toFixed(1) : 0;
     
+    const dataMain = isBRL ? [anteriorReais, atualReais] : [anteriorKWh, atualKWh];
+    const dataSecondary = isBRL ? [anteriorKWh, atualKWh] : [anteriorReais, atualReais];
+
     return {
         type: 'bar',
         data: {
             labels: ['Mês Anterior', 'Mês Atual'],
             datasets: [{
-                label: 'Consumo Total (kWh)',
-                data: [anterior, atual],
+                label: labelMain,
+                data: dataMain,
+                secondaryData: dataSecondary,
                 backgroundColor: [
                     '#94a3b8', // Cinza para anterior
                     aumentou ? dangerColor : primaryColor // Vermelho se aumentou, Verde se diminuiu
@@ -1792,7 +2050,30 @@ function getConfigComparacao(primaryColor, dangerColor, dados) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            layout: {
+                padding: {
+                    top: 40
+                }
+            },
             plugins: {
+                datalabels: {
+                    display: true,
+                    anchor: 'end',
+                    align: 'top',
+                    formatter: function(value, context) {
+                        if (isBRL) {
+                            return 'R$ ' + value.toFixed(2).replace('.', ',');
+                        } else {
+                            return value.toFixed(1) + ' kWh';
+                        }
+                    },
+                    color: function(context) {
+                        return document.documentElement.getAttribute('data-theme') === 'dark' ? '#cbd5e1' : '#475569';
+                    },
+                    font: {
+                        weight: 'bold'
+                    }
+                },
                 legend: { display: false },
                 title: { 
                     display: true, 
@@ -1806,7 +2087,14 @@ function getConfigComparacao(primaryColor, dangerColor, dados) {
                     cornerRadius: 10,
                     callbacks: {
                         label: function(context) {
-                            return `${parseFloat(context.raw).toFixed(2)} kWh`;
+                            const val = parseFloat(context.raw);
+                            const secVal = context.dataset.secondaryData[context.dataIndex] || 0;
+                            
+                            if (isBRL) {
+                                return `R$ ${val.toFixed(2).replace('.', ',')} (${secVal.toFixed(1)} kWh)`;
+                            } else {
+                                return `${val.toFixed(1)} kWh (R$ ${secVal.toFixed(2).replace('.', ',')})`;
+                            }
                         }
                     }
                 }
@@ -1815,7 +2103,7 @@ function getConfigComparacao(primaryColor, dangerColor, dados) {
                 y: { 
                     beginAtZero: true,
                     grid: { color: 'rgba(0,0,0,0.05)' },
-                    title: { display: true, text: 'kWh', font: { weight: '600' } }
+                    title: { display: true, text: yAxisTitle, font: { weight: '600' } }
                 },
                 x: {
                     grid: { display: false },

@@ -121,6 +121,13 @@ CREATE TABLE IF NOT EXISTS medias_referencia (
 
 -- Atualização na tabela de Aparelhos
 ALTER TABLE aparelhos ADD COLUMN IF NOT EXISTS categoria VARCHAR(100);
+ALTER TABLE aparelhos ADD COLUMN IF NOT EXISTS fator_uso DECIMAL(4,2) DEFAULT 1.00;
+
+-- Atualiza fator_uso padrão para Geladeiras e Freezers (caso a coluna tenha acabado de ser criada)
+UPDATE aparelhos 
+SET fator_uso = 0.50 
+WHERE (nome ILIKE '%geladeira%' OR nome ILIKE '%freezer%') 
+AND fator_uso = 1.00;
 
 -- ============================================
 -- 2. DADOS (POPULAÇÃO DA TABELA DE REFERÊNCIA)

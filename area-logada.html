@@ -11,7 +11,6 @@
     <link rel="icon" type="image/png" href="src/images/icon.png">
 </head>
 <body>
-    <!-- HEADER -->
     <header class="header">
         <div class="container">
             <a href="area-logada.html" class="logo" onclick="voltarDashboard(); return false;">
@@ -127,6 +126,7 @@
                                         <span class="tab-text">Cômodos</span>
                                     </button>
                                 </div>
+                                
                                 <div class="chart-extra-controls">
                                     <button class="chart-extra-btn" onclick="mudarGrafico('projecao', this)" data-tooltip="Projeção até fim do mês">
                                         <span>🎯</span>
@@ -147,6 +147,19 @@
                             <div class="chart-insight" id="chartInsight">
                                 <span class="insight-icon">💡</span>
                                 <span class="insight-text">Seu consumo reduziu 12% comparado ao mês anterior</span>
+                            </div>
+                            
+                            <!-- Toggle R$ / kWh -->
+                            <div class="chart-unit-toggle">
+                                <span class="unit-label">Exibir em:</span>
+                                <div class="unit-toggle-switch">
+                                    <button class="unit-btn active" onclick="mudarUnidadeGrafico('BRL')" id="btnUnitBRL" title="Mostrar valores em Reais">
+                                        💰 R$
+                                    </button>
+                                    <button class="unit-btn" onclick="mudarUnidadeGrafico('kWh')" id="btnUnitKWh" title="Mostrar valores em kWh">
+                                        ⚡ kWh
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -503,6 +516,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     <script src="scripts/area-logada.js"></script>
 </body>
 </html>

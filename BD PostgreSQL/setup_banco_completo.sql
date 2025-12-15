@@ -1,13 +1,57 @@
--- ==================================================
--- ATUALIZAÇÃO COMPLETA DO BANCO DE DADOS (UNIFICADO)
--- Inclui tabelas de relatórios e dados personalizados de aparelhos
--- ==================================================
-
 -- 0. Configuração de Encoding
 SET client_encoding TO 'UTF8';
 
 -- ============================================
--- 1. ESTRUTURA DE TABELAS (RELATÓRIOS)
+-- 1. ESTRUTURA DE TABELAS PRINCIPAIS
+-- ============================================
+
+-- Tabela de Usuários
+CREATE TABLE IF NOT EXISTS usuarios (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    senha VARCHAR(255) NOT NULL,
+    receber_email_semanal BOOLEAN DEFAULT TRUE,
+    receber_alertas BOOLEAN DEFAULT TRUE,
+    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela de Residências
+CREATE TABLE IF NOT EXISTS residencias (
+    id BIGSERIAL PRIMARY KEY,
+    usuario_id INTEGER NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+    nome VARCHAR(100) NOT NULL,
+    imagem VARCHAR(100), -- Armazena o tipo de residência (ex: 'Apartamento_1_morador')
+    cidade VARCHAR(100),
+    tarifa_kwh NUMERIC(10, 4) DEFAULT 0.0,
+    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela de Cômodos
+CREATE TABLE IF NOT EXISTS comodos (
+    id BIGSERIAL PRIMARY KEY,
+    residencia_id BIGINT NOT NULL REFERENCES residencias(id) ON DELETE CASCADE,
+    nome VARCHAR(100) NOT NULL,
+    imagem VARCHAR(255),
+    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela de Aparelhos
+CREATE TABLE IF NOT EXISTS aparelhos (
+    id BIGSERIAL PRIMARY KEY,
+    usuario_id INTEGER NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+    residencia_id BIGINT NOT NULL REFERENCES residencias(id) ON DELETE CASCADE,
+    comodo_id BIGINT NOT NULL REFERENCES comodos(id) ON DELETE CASCADE,
+    nome VARCHAR(150) NOT NULL,
+    potencia_watts INTEGER NOT NULL,
+    horas_uso NUMERIC(5, 2) NOT NULL,
+    fator_uso DECIMAL(4,2) DEFAULT 1.00,
+    categoria VARCHAR(100),
+    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ============================================
+-- 2. ESTRUTURA DE TABELAS (RELATÓRIOS E ANALYTICS)
 -- ============================================
 
 -- Tabela de Metas
@@ -108,35 +152,24 @@ CREATE INDEX IF NOT EXISTS idx_alertas_lido ON alertas_sistema (lido);
 CREATE INDEX IF NOT EXISTS idx_alertas_data ON alertas_sistema (data_criacao);
 
 -- Tabela de Médias de Referência
--- (Já criada com a coluna correta NUMERIC(10, 2) para potência)
 CREATE TABLE IF NOT EXISTS medias_referencia (
     id SERIAL PRIMARY KEY,
     categoria VARCHAR(100) NOT NULL,
     nome_aparelho VARCHAR(150) NOT NULL,
     consumo_medio_kwh_mes NUMERIC(10, 4) NOT NULL,
-    potencia_media_watts NUMERIC(10, 2), -- Alterado para NUMERIC conforme atualização
+    potencia_media_watts NUMERIC(10, 2),
     fonte VARCHAR(200),
     data_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Atualização na tabela de Aparelhos
-ALTER TABLE aparelhos ADD COLUMN IF NOT EXISTS categoria VARCHAR(100);
-ALTER TABLE aparelhos ADD COLUMN IF NOT EXISTS fator_uso DECIMAL(4,2) DEFAULT 1.00;
-
--- Atualiza fator_uso padrão para Geladeiras e Freezers (caso a coluna tenha acabado de ser criada)
-UPDATE aparelhos 
-SET fator_uso = 0.50 
-WHERE (nome ILIKE '%geladeira%' OR nome ILIKE '%freezer%') 
-AND fator_uso = 1.00;
-
 -- ============================================
--- 2. DADOS (POPULAÇÃO DA TABELA DE REFERÊNCIA)
+-- 3. DADOS (POPULAÇÃO DA TABELA DE REFERÊNCIA)
 -- ============================================
 
 -- Limpar dados antigos (caso a tabela já existisse com dados)
 TRUNCATE TABLE medias_referencia RESTART IDENTITY;
 
--- Inserir dados personalizados (Lista Completa e Corrigida)
+-- Inserir dados personalizados
 INSERT INTO medias_referencia (categoria, nome_aparelho, potencia_media_watts, consumo_medio_kwh_mes, fonte) VALUES
 -- Cozinha
 ('Cozinha', 'Geladeira (1 porta)', 200, 35.0, 'Personalizado'),
@@ -194,7 +227,7 @@ INSERT INTO medias_referencia (categoria, nome_aparelho, potencia_media_watts, c
 ('Outros', 'Furadeira elétrica', 750, 0.4, 'Personalizado');
 
 -- ============================================
--- 3. COMENTÁRIOS
+-- 4. COMENTÁRIOS
 -- ============================================
 COMMENT ON TABLE metas_consumo IS 'Armazena metas de gasto mensal definidas pelo usuário';
 COMMENT ON TABLE historico_consumo IS 'Registra consumo diário para análises evolutivas';

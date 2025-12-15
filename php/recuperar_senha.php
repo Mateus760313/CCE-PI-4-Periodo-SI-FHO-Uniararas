@@ -71,7 +71,7 @@ try {
     $mail->Subject = 'Recuperação de Senha - CCE';
     
     // O link deve abrir a página estática de redefinição (redefinir_senha.html)
-    $resetLink = "http://localhost/PI%20para%20testes/redefinir_senha.html?token=" . $token;
+    $resetLink = "http://localhost/CCE-PI-4-Periodo-SI-FHO-Uniararas-main/redefinir_senha.html?token=" . $token;
     
     $mail->Body = "
         <h1>Recuperação de Senha</h1>

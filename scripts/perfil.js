@@ -1,12 +1,7 @@
-// ========== PERFIL.JS ==========
-
-// Variáveis globais
 let usuarioLogado = {};
 let modoEdicao = false;
 
-// ========== INICIALIZAÇÃO ==========
 document.addEventListener('DOMContentLoaded', function() {
-    // Dark Mode Toggle
     const themeToggle = document.getElementById('themeToggle');
     const savedTheme = localStorage.getItem('theme');
     
@@ -25,29 +20,16 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Carrega dados do usuário
     carregarDadosUsuario();
-    
-    // Setup das abas
     setupTabs();
-    
-    // Setup do formulário de dados
     setupFormDados();
-    
-    // Setup do indicador de força da senha
     setupPasswordStrength();
-    
-    // Setup do dropdown do usuário
     setupUserDropdown();
-    
-    // Atualiza visual do tema selecionado
     atualizarTemaVisual();
-    
-    // Setup do upload de foto
     setupUploadFoto();
+    setupPreferencias();
 });
 
-// ========== CARREGAR DADOS DO USUÁRIO ==========
 function carregarDadosUsuario() {
     fetch('php/get_usuario_logado.php', {
         method: 'POST',
@@ -78,7 +60,6 @@ function preencherDadosPerfil(data) {
     const inicial = data.nome.charAt(0).toUpperCase();
     const temFoto = data.foto_perfil && data.foto_perfil.length > 0;
     
-    // Header dropdown - avatar pequeno
     const userAvatar = document.getElementById('userAvatar');
     const userAvatarImg = document.getElementById('userAvatarImg');
     const dropdownAvatar = document.getElementById('dropdownAvatar');
@@ -87,7 +68,6 @@ function preencherDadosPerfil(data) {
     const dropdownEmail = document.getElementById('dropdownEmail');
     
     if (temFoto) {
-        // Mostra imagem, esconde inicial
         if (userAvatar) userAvatar.style.display = 'none';
         if (userAvatarImg) {
             userAvatarImg.src = data.foto_perfil;
@@ -99,7 +79,6 @@ function preencherDadosPerfil(data) {
             dropdownAvatarImg.style.display = 'block';
         }
     } else {
-        // Mostra inicial, esconde imagem
         if (userAvatar) {
             userAvatar.textContent = inicial;
             userAvatar.style.display = 'flex';
@@ -115,7 +94,6 @@ function preencherDadosPerfil(data) {
     if (dropdownName) dropdownName.textContent = data.nome;
     if (dropdownEmail) dropdownEmail.textContent = data.email;
     
-    // Perfil principal - avatar grande
     const perfilAvatar = document.getElementById('perfilAvatar');
     const perfilAvatarImg = document.getElementById('perfilAvatarImg');
     const perfilNome = document.getElementById('perfilNome');
@@ -141,21 +119,25 @@ function preencherDadosPerfil(data) {
     if (perfilNome) perfilNome.textContent = data.nome;
     if (perfilEmail) perfilEmail.textContent = data.email;
     
-    // Formulário
     document.getElementById('inputNome').value = data.nome;
     document.getElementById('inputEmail').value = data.email;
     document.getElementById('inputTelefone').value = data.telefone || '';
+
+    const checkRelatorio = document.getElementById('relatorioSemanal');
+    const checkAlertas = document.getElementById('alertaConsumo');
+
+    if (checkRelatorio) checkRelatorio.checked = data.receber_email_semanal === true || data.receber_email_semanal === 't';
+    if (checkAlertas) checkAlertas.checked = data.receber_alertas === true || data.receber_alertas === 't';
     
-    // Data de criação (se disponível)
     if (data.criado_em) {
         const dataCriacao = new Date(data.criado_em);
         const mesAno = dataCriacao.toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' });
-        document.getElementById('statMembro').textContent = mesAno;
+        const statMembro = document.getElementById('statMembro');
+        if (statMembro) statMembro.textContent = mesAno;
     }
 }
 
 function carregarEstatisticas() {
-    // Busca residências para contar
     fetch('php/get_residencias.php', { credentials: 'include' })
         .then(res => res.json())
         .then(data => {
@@ -163,7 +145,6 @@ function carregarEstatisticas() {
                 const residencias = data.residencias;
                 document.getElementById('statResidencias').textContent = residencias.length;
                 
-                // Conta total de aparelhos
                 let totalAparelhos = 0;
                 residencias.forEach(r => {
                     totalAparelhos += parseInt(r.total_aparelhos || 0);
@@ -174,7 +155,6 @@ function carregarEstatisticas() {
         .catch(err => console.error('Erro ao carregar estatísticas:', err));
 }
 
-// ========== TABS ==========
 function setupTabs() {
     const tabs = document.querySelectorAll('.perfil-tab');
     
@@ -182,22 +162,18 @@ function setupTabs() {
         tab.addEventListener('click', () => {
             const targetId = tab.dataset.tab;
             
-            // Remove active de todas as tabs
             tabs.forEach(t => t.classList.remove('active'));
             tab.classList.add('active');
             
-            // Esconde todos os conteúdos
             document.querySelectorAll('.tab-content').forEach(content => {
                 content.classList.remove('active');
             });
             
-            // Mostra o conteúdo da tab clicada
             document.getElementById(`tab-${targetId}`).classList.add('active');
         });
     });
 }
 
-// ========== EDIÇÃO DE DADOS PESSOAIS ==========
 function setupFormDados() {
     const btnEditar = document.getElementById('btnEditarDados');
     const form = document.getElementById('formDadosPessoais');
@@ -231,7 +207,6 @@ function habilitarEdicao(habilitar) {
 }
 
 function cancelarEdicaoDados() {
-    // Restaura os valores originais
     document.getElementById('inputNome').value = usuarioLogado.nome;
     document.getElementById('inputEmail').value = usuarioLogado.email;
     document.getElementById('inputTelefone').value = usuarioLogado.telefone || '';
@@ -279,7 +254,6 @@ function salvarDadosPessoais() {
     });
 }
 
-// ========== ALTERAR SENHA ==========
 function setupPasswordStrength() {
     const novaSenha = document.getElementById('novaSenha');
     const strengthDiv = document.getElementById('passwordStrength');
@@ -364,9 +338,7 @@ function alterarSenha(event) {
     });
 }
 
-// ========== TEMA ==========
 function setTheme(theme) {
-    // Atualiza visual dos botões
     document.querySelectorAll('.theme-option').forEach(btn => {
         btn.classList.remove('active');
         if (btn.dataset.theme === theme) {
@@ -399,7 +371,6 @@ function atualizarTemaVisual() {
     });
 }
 
-// ========== EXCLUIR CONTA ==========
 function confirmarExclusaoConta() {
     document.getElementById('modalExcluirConta').classList.add('active');
 }
@@ -444,7 +415,6 @@ function excluirConta(event) {
     });
 }
 
-// ========== USER DROPDOWN ==========
 function setupUserDropdown() {
     const trigger = document.getElementById('userTrigger');
     const dropdown = document.getElementById('userDropdown');
@@ -469,7 +439,6 @@ function setupUserDropdown() {
     }
 }
 
-// ========== LOGOUT ==========
 function logout() {
     if (confirm('Deseja realmente sair?')) {
         fetch('php/logout.php', { method: 'POST', credentials: 'include' })
@@ -484,14 +453,12 @@ function logout() {
     }
 }
 
-// Fechar modal ao clicar fora
 document.addEventListener('click', (e) => {
     if (e.target.classList.contains('modal')) {
         e.target.classList.remove('active');
     }
 });
 
-// ========== UPLOAD DE FOTO ==========
 function setupUploadFoto() {
     const inputFoto = document.getElementById('inputFotoPerfil');
     const btnRemover = document.getElementById('btnRemoverFoto');
@@ -510,7 +477,6 @@ function handleFotoUpload(event) {
     
     if (!file) return;
     
-    // Validações no cliente
     const tiposPermitidos = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
     const tamanhoMaximo = 5 * 1024 * 1024; // 5MB
     
@@ -526,14 +492,11 @@ function handleFotoUpload(event) {
         return;
     }
     
-    // Mostra loading
     mostrarLoadingFoto(true);
     
-    // Prepara o FormData
     const formData = new FormData();
     formData.append('foto', file);
     
-    // Envia para o servidor
     fetch('php/upload_foto_perfil.php', {
         method: 'POST',
         body: formData,
@@ -544,7 +507,6 @@ function handleFotoUpload(event) {
         mostrarLoadingFoto(false);
         
         if (data.sucesso) {
-            // Atualiza a foto em todas as áreas
             usuarioLogado.foto_perfil = data.foto_url;
             preencherDadosPerfil(usuarioLogado);
             alert('Foto atualizada com sucesso!');
@@ -558,7 +520,6 @@ function handleFotoUpload(event) {
         alert('Erro ao enviar foto. Tente novamente.');
     })
     .finally(() => {
-        // Limpa o input para permitir reenvio do mesmo arquivo
         event.target.value = '';
     });
 }
@@ -577,7 +538,6 @@ function removerFoto() {
         mostrarLoadingFoto(false);
         
         if (data.sucesso) {
-            // Remove a foto de todas as áreas
             usuarioLogado.foto_perfil = null;
             preencherDadosPerfil(usuarioLogado);
             alert('Foto removida com sucesso!');
@@ -597,7 +557,6 @@ function mostrarLoadingFoto(mostrar) {
     
     if (!wrapper) return;
     
-    // Remove loading existente se houver
     const loadingExistente = wrapper.querySelector('.upload-loading');
     if (loadingExistente) {
         loadingExistente.remove();
@@ -608,4 +567,114 @@ function mostrarLoadingFoto(mostrar) {
         loading.className = 'upload-loading';
         wrapper.appendChild(loading);
     }
+}
+
+function setupPreferencias() {
+    const checkRelatorio = document.getElementById('relatorioSemanal');
+    const checkAlertas = document.getElementById('alertaConsumo');
+
+    if (checkRelatorio) {
+        checkRelatorio.addEventListener('change', (e) => {
+            salvarPreferencia('relatorio_semanal', e.target.checked);
+        });
+    }
+
+    if (checkAlertas) {
+        checkAlertas.addEventListener('change', (e) => {
+            salvarPreferencia('alertas', e.target.checked);
+        });
+    }
+}
+
+function salvarPreferencia(tipo, valor) {
+    const formData = new FormData();
+    formData.append('tipo', tipo);
+    formData.append('valor', valor);
+
+    fetch('php/update_preferencias.php', {
+        method: 'POST',
+        body: formData,
+        credentials: 'include'
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.sucesso) {
+            console.log('Preferência salva:', tipo, valor);
+            if (tipo === 'relatorio_semanal' && valor === true) {
+                if (confirm('Relatório semanal ativado! Deseja receber um email de teste agora?')) {
+                    enviarEmailTeste();
+                }
+            }
+        } else {
+            console.error('Erro ao salvar preferência:', data.mensagem);
+            alert('Erro ao salvar preferência. Tente novamente.');
+            if (tipo === 'relatorio_semanal') {
+                document.getElementById('relatorioSemanal').checked = !valor;
+            } else if (tipo === 'alertas') {
+                document.getElementById('alertaConsumo').checked = !valor;
+            }
+        }
+    })
+    .catch(err => {
+        console.error('Erro:', err);
+        alert('Erro de conexão.');
+    });
+}
+
+function enviarEmailTeste() {
+    const formData = new FormData();
+    formData.append('acao', 'enviar_relatorio_email');
+    
+    fetch('php/api_relatorios.php', {
+        method: 'POST',
+        body: formData,
+        credentials: 'include'
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.sucesso) {
+            alert('Email de teste enviado com sucesso!');
+        } else {
+            alert('Erro ao enviar email: ' + data.mensagem);
+        }
+    })
+    .catch(err => console.error(err));
+}
+
+function simularConsumo() {
+    if (!confirm('Isso irá substituir a potência e horas de uso de TODOS os seus aparelhos por valores de teste. Continuar?')) {
+        return;
+    }
+
+    const btn = document.querySelector('button[onclick="simularConsumo()"]');
+    const originalText = btn ? btn.innerHTML : 'Simular';
+    
+    if(btn) {
+        btn.innerHTML = '<span>⏳</span> Processando...';
+        btn.disabled = true;
+    }
+
+    fetch('php/simular_consumo.php', {
+        method: 'POST',
+        credentials: 'include'
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.sucesso) {
+            alert(data.mensagem + '\n' + (data.detalhes || ''));
+            carregarEstatisticas();
+        } else {
+            alert('Erro: ' + data.mensagem);
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert('Erro ao conectar com o servidor.');
+    })
+    .finally(() => {
+        if(btn) {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    });
 }

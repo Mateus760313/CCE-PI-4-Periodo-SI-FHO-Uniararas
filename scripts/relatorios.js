@@ -726,3 +726,41 @@ function logout() {
             });
     }
 }
+
+// ========== ENVIAR RELATÓRIO POR EMAIL ==========
+function enviarRelatorioEmail() {
+    const residenciaId = document.getElementById('selectResidencia').value;
+    
+    if (!confirm('Deseja receber o relatório atual por email?')) return;
+
+    const btn = document.querySelector('button[onclick="enviarRelatorioEmail()"]');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<span>⏳</span> Enviando...';
+    btn.disabled = true;
+
+    const formData = new FormData();
+    formData.append('acao', 'enviar_relatorio_email');
+    if (residenciaId) formData.append('residencia_id', residenciaId);
+
+    fetch('php/api_relatorios.php', {
+        method: 'POST',
+        body: formData,
+        credentials: 'include'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.sucesso) {
+            alert('Relatório enviado com sucesso para seu email!');
+        } else {
+            alert('Erro ao enviar relatório: ' + data.mensagem);
+        }
+    })
+    .catch(error => {
+        console.error('Erro:', error);
+        alert('Erro ao processar solicitação.');
+    })
+    .finally(() => {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    });
+}

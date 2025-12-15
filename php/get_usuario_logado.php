@@ -21,7 +21,7 @@ if ($acao === 'me') {
     if (!empty($_SESSION['usuario_id'])) {
         try {
             // Busca dados completos do usuário no banco
-            $sql = "SELECT id, nome, email, telefone, foto_perfil, data_cadastro FROM usuarios WHERE id = :id";
+            $sql = "SELECT id, nome, email, telefone, foto_perfil, data_cadastro, receber_email_semanal, receber_alertas FROM usuarios WHERE id = :id";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([':id' => $_SESSION['usuario_id']]);
             $usuario = $stmt->fetch(PDO::FETCH_ASSOC);

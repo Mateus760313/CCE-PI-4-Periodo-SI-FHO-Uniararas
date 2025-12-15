@@ -2,6 +2,13 @@
 session_start();
 header('Content-Type: application/json');
 require 'conexao.php';
+require __DIR__ . '/config.php';
+require __DIR__ . '/PHPMailer/src/Exception.php';
+require __DIR__ . '/PHPMailer/src/PHPMailer.php';
+require __DIR__ . '/PHPMailer/src/SMTP.php';
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
 $usuarioId = $_SESSION['usuario_id'] ?? null;
 if (!$usuarioId) {
@@ -56,6 +63,11 @@ try {
             
         case 'marcar_alerta_lido':
             marcarAlertaLido($pdo, $usuarioId);
+            break;
+
+        // ========== EMAIL ==========
+        case 'enviar_relatorio_email':
+            enviarRelatorioEmail($pdo, $usuarioId);
             break;
             
         default:
@@ -204,6 +216,133 @@ function obterResumoGeral($pdo, $usuarioId, $residenciaId) {
         'dias_passados' => intval(date('j')),
         'dias_restantes' => intval(date('t')) - intval(date('j'))
     ];
+}
+
+// ========== ENVIO DE EMAIL ==========
+function enviarRelatorioEmail($pdo, $usuarioId) {
+    $residenciaId = $_POST['residencia_id'] ?? null;
+
+    // 1. Obter dados do usuário
+    $stmtUser = $pdo->prepare("SELECT email, nome FROM usuarios WHERE id = :uid");
+    $stmtUser->execute([':uid' => $usuarioId]);
+    $user = $stmtUser->fetch(PDO::FETCH_ASSOC);
+
+    if (!$user || empty($user['email'])) {
+        echo json_encode(['sucesso' => false, 'mensagem' => 'Email do usuário não encontrado']);
+        return;
+    }
+
+    // 2. Coletar dados do relatório
+    $resumo = obterResumoGeral($pdo, $usuarioId, $residenciaId);
+    $topAparelhos = obterTopAparelhos($pdo, $usuarioId, $residenciaId, 20); // Aumentado limite para 20
+    
+    // Simular estrutura para gerar recomendações
+    $dadosParaRecomendacao = [
+        'resumo' => $resumo,
+        'top_aparelhos' => $topAparelhos,
+        'meta' => ['status' => 'dentro'], // Simplificação
+        'tendencias' => ['variacao_percentual' => 0]
+    ];
+    $recomendacoes = gerarRecomendacoes($dadosParaRecomendacao);
+
+    // Se não houver recomendações específicas, usa as genéricas
+    if (empty($recomendacoes)) {
+        $recomendacoes = [
+            ['mensagem' => 'Não deixar alimentos quentes na geladeira.'],
+            ['mensagem' => 'Deixar o ar condicionado a 23 ou 24 graus.'],
+            ['mensagem' => 'Apagar as luzes ao sair dos ambientes.'],
+            ['mensagem' => 'Evitar banhos muito longos no chuveiro elétrico.']
+        ];
+    }
+
+    // 3. Construir HTML do Email
+    $nomeResidencia = $residenciaId ? "da sua residência" : "de todas as suas residências";
+    
+    $html = "
+    <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333;'>
+        <div style='background-color: #4CAF50; padding: 20px; text-align: center; color: white; border-radius: 8px 8px 0 0;'>
+            <h1 style='margin: 0;'>Relatório de Consumo</h1>
+            <p style='margin: 5px 0 0;'>Calculadora de Consumo Energético</p>
+        </div>
+        
+        <div style='padding: 20px; border: 1px solid #ddd; border-top: none; border-radius: 0 0 8px 8px;'>
+            <p>Olá, <strong>{$user['nome']}</strong>!</p>
+            <p>Aqui está o resumo atualizado do consumo energético {$nomeResidencia}.</p>
+            
+            <h2 style='color: #4CAF50; border-bottom: 2px solid #4CAF50; padding-bottom: 5px;'>Resumo do Mês</h2>
+            <table style='width: 100%; border-collapse: collapse; margin-bottom: 20px;'>
+                <tr>
+                    <td style='padding: 8px; border-bottom: 1px solid #eee;'><strong>Consumo Projetado:</strong></td>
+                    <td style='padding: 8px; border-bottom: 1px solid #eee; text-align: right;'>{$resumo['consumo_kwh_projetado']} kWh</td>
+                </tr>
+                <tr>
+                    <td style='padding: 8px; border-bottom: 1px solid #eee;'><strong>Custo Estimado:</strong></td>
+                    <td style='padding: 8px; border-bottom: 1px solid #eee; text-align: right;'>R$ {$resumo['custo_projetado']}</td>
+                </tr>
+                <tr>
+                    <td style='padding: 8px; border-bottom: 1px solid #eee;'><strong>Total de Aparelhos:</strong></td>
+                    <td style='padding: 8px; border-bottom: 1px solid #eee; text-align: right;'>{$resumo['total_aparelhos']}</td>
+                </tr>
+            </table>
+
+            <h2 style='color: #4CAF50; border-bottom: 2px solid #4CAF50; padding-bottom: 5px;'>Top Consumidores</h2>
+            <ul style='padding-left: 20px;'>";
+            
+    foreach ($topAparelhos as $ap) {
+        $consumo = number_format($ap['consumo_kwh_mes'], 2, ',', '.');
+        $custo = number_format($ap['custo_mes'], 2, ',', '.');
+        $html .= "<li style='margin-bottom: 5px;'><strong>{$ap['nome']}</strong>: {$consumo} kWh (R$ {$custo})</li>";
+    }
+
+    $html .= "
+            </ul>
+
+            <h2 style='color: #4CAF50; border-bottom: 2px solid #4CAF50; padding-bottom: 5px;'>Dicas para Economizar</h2>
+            <ul style='padding-left: 20px;'>";
+            
+    foreach ($recomendacoes as $rec) {
+        $texto = $rec['mensagem'] ?? $rec['texto'] ?? '';
+        if ($texto) {
+            $html .= "<li style='margin-bottom: 5px;'>{$texto}</li>";
+        }
+    }
+
+    $html .= "
+            </ul>
+            
+            <div style='margin-top: 30px; text-align: center; font-size: 12px; color: #888;'>
+                <p>Este relatório foi gerado automaticamente em " . date('d/m/Y H:i') . ".</p>
+                <p>CCE - Seu parceiro na economia de energia.</p>
+            </div>
+        </div>
+    </div>";
+
+    // 4. Enviar Email via PHPMailer
+    try {
+        $mail = new PHPMailer(true);
+        $mail->isSMTP();
+        $mail->Host = SMTP_HOST;
+        $mail->SMTPAuth = true;
+        $mail->Username = SMTP_USER;
+        $mail->Password = SMTP_PASS;
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->Port = SMTP_PORT;
+        $mail->CharSet = 'UTF-8';
+
+        $mail->setFrom(SMTP_FROM, SMTP_FROM_NAME);
+        $mail->addAddress($user['email'], $user['nome']);
+
+        $mail->isHTML(true);
+        $mail->Subject = 'Relatório Semanal de Consumo - CCE';
+        $mail->Body = $html;
+        $mail->AltBody = strip_tags(str_replace(['<br>', '</p>'], ["\n", "\n\n"], $html));
+
+        $mail->send();
+        echo json_encode(['sucesso' => true, 'mensagem' => 'Relatório enviado com sucesso para ' . $user['email']]);
+    } catch (Exception $e) {
+        error_log('Erro envio email: ' . $e->getMessage());
+        echo json_encode(['sucesso' => false, 'mensagem' => 'Erro ao enviar email: ' . $e->getMessage()]);
+    }
 }
 
 function analisarMeta($pdo, $usuarioId, $residenciaId, $resumo) {

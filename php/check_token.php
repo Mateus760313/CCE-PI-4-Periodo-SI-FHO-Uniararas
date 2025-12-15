@@ -1,8 +1,8 @@
 <?php
 // Endpoint de debug temporário para checar tokens de recuperação
 // Uso: GET ou POST com parâmetro 'token'
-// EXEMPLO (navegador): http://localhost/PI%20para%20testes/php/check_token.php?token=abc
-// EXEMPLO (curl): curl -X POST -d "token=abc" http://localhost/PI%20para%20testes/php/check_token.php
+// EXEMPLO (navegador): http://localhost/CCE-PI-4-Periodo-SI-FHO-Uniararas-main/php/check_token.php?token=abc
+// EXEMPLO (curl): curl -X POST -d "token=abc" http://localhost/CCE-PI-4-Periodo-SI-FHO-Uniararas-main/php/check_token.php
 
 header('Content-Type: application/json');
 require __DIR__ . '/conexao.php';
